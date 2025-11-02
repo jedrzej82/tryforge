@@ -3,6 +3,8 @@ const GraphicsGenerator = require('./graphics-generator');
 const fs = require('fs').promises;
 const path = require('path');
 const chokidar = require('chokidar');
+const logger = require('../utils/logger');
+const { handleError } = require('../utils/error-handler');
 
 /**
  * Autonomous Graphics System
@@ -38,12 +40,17 @@ class AutonomousGraphicsSystem {
 
       if (aiProvider === 'openrouter') {
         const OpenRouterAPI = require('../ai-services/openrouter-api');
+        logger.info('Using OpenRouter for graphics generation');
         return new OpenRouterAPI();
       } else {
         const ClaudeAPI = require('../ai-services/claude-api');
+        logger.info('Using Claude for graphics generation');
         return new ClaudeAPI();
       }
     } catch (error) {
+      logger.warn('AI service not available, using fallback mode', {
+        error: error.message
+      });
       console.warn('⚠️  AI service not available, using fallback mode');
       return {
         generateCode: async (prompt) => {
@@ -57,6 +64,11 @@ class AutonomousGraphicsSystem {
    * Generate all missing graphics for a project
    */
   async generateMissingGraphics(requirements, projectPath) {
+    logger.info('Starting autonomous graphics generation', {
+      projectPath: projectPath,
+      outputDir: this.options.outputDir
+    });
+
     console.log('\n🚀 Autonomous Graphics Generation Starting...\n');
     console.log(`📁 Project: ${projectPath}`);
     console.log(`🎨 Requirements: ${requirements.name || requirements.type}\n`);

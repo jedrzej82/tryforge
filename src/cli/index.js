@@ -8,6 +8,8 @@
 const { Command } = require('commander');
 const chalk = require('chalk');
 const packageJson = require('../../package.json');
+const logger = require('../utils/logger');
+const { handleError } = require('../utils/error-handler');
 const CreateCommand = require('./commands/create');
 const RefactorCommand = require('./commands/refactor');
 const AnalyzeCommand = require('./commands/analyze');
@@ -15,12 +17,42 @@ const StatusCommand = require('./commands/status');
 
 const program = new Command();
 
+// Global error handler for unhandled rejections
+process.on('unhandledRejection', (reason, promise) => {
+  handleError(reason instanceof Error ? reason : new Error(String(reason)), {
+    context: 'Unhandled Promise Rejection',
+    exitOnError: true
+  });
+});
+
+// Global error handler for uncaught exceptions
+process.on('uncaughtException', (error) => {
+  handleError(error, {
+    context: 'Uncaught Exception',
+    exitOnError: true
+  });
+});
+
 // Configure CLI
 program
   .name('tryforge')
   .description(chalk.cyan('🔥 TryForge - Triple AI Application Framework'))
   .version(packageJson.version, '-v, --version', 'Output the version number')
-  .helpOption('-h, --help', 'Display help for command');
+  .helpOption('-h, --help', 'Display help for command')
+  .option('--verbose', 'Enable debug mode with detailed logging')
+  .hook('preAction', (thisCommand) => {
+    // Enable debug mode if --verbose flag is set
+    if (thisCommand.opts().verbose) {
+      logger.enableDebug();
+      logger.debug('Debug mode enabled via --verbose flag');
+    }
+
+    // Log command execution
+    logger.info(`Executing command: ${thisCommand.name()}`, {
+      args: thisCommand.args,
+      options: thisCommand.opts()
+    });
+  });
 
 // CREATE Command
 program
@@ -335,5 +367,12 @@ if (process.argv.length === 2) {
   process.exit(0);
 }
 
-// Parse and execute
-program.parse(process.argv);
+// Parse and execute with error handling
+try {
+  program.parse(process.argv);
+} catch (error) {
+  handleError(error, {
+    context: 'CLI Execution',
+    exitOnError: true
+  });
+}

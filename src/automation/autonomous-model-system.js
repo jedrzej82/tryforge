@@ -5,6 +5,8 @@
 
 const chalk = require('chalk');
 const ora = require('ora');
+const logger = require('../utils/logger');
+const { handleError, tryWithHandler } = require('../utils/error-handler');
 const ModelDiscovery = require('./model-discovery');
 const ModelGenerator = require('./model-generator');
 
@@ -14,29 +16,47 @@ const OpenRouterAPI = require('../ai-services/openrouter-api');
 
 class AutonomousModelSystem {
   constructor(options = {}) {
-    // Initialize AI provider
-    const aiProvider = process.env.AI_PROVIDER || 'claude';
+    try {
+      // Initialize AI provider
+      const aiProvider = process.env.AI_PROVIDER || 'claude';
 
-    if (aiProvider === 'openrouter') {
-      this.ai = new OpenRouterAPI();
-      this.providerName = 'OpenRouter';
-    } else {
-      this.ai = new ClaudeAPI();
-      this.providerName = 'Claude';
+      if (aiProvider === 'openrouter') {
+        this.ai = new OpenRouterAPI();
+        this.providerName = 'OpenRouter';
+      } else {
+        this.ai = new ClaudeAPI();
+        this.providerName = 'Claude';
+      }
+
+      this.discovery = new ModelDiscovery(this.ai);
+      this.generator = new ModelGenerator();
+
+      this.options = {
+        orm: options.orm || 'prisma',
+        language: options.language || 'typescript',
+        autoEnrich: options.autoEnrich !== false,
+        generateMigrations: options.generateMigrations !== false,
+        ...options
+      };
+
+      logger.info('Autonomous Model System initialized', {
+        provider: this.providerName,
+        orm: this.options.orm,
+        language: this.options.language
+      });
+
+      console.log(chalk.cyan(`🤖 Autonomous Model System initialized with ${this.providerName}`));
+    } catch (error) {
+      logger.error('Failed to initialize Autonomous Model System', {
+        error: error.message
+      });
+      handleError(error, {
+        context: 'Autonomous Model System Initialization',
+        recovery: 'Check your AI provider configuration',
+        suggestion: 'Ensure API keys are properly set in .env file'
+      });
+      throw error;
     }
-
-    this.discovery = new ModelDiscovery(this.ai);
-    this.generator = new ModelGenerator();
-
-    this.options = {
-      orm: options.orm || 'prisma',
-      language: options.language || 'typescript',
-      autoEnrich: options.autoEnrich !== false,
-      generateMigrations: options.generateMigrations !== false,
-      ...options
-    };
-
-    console.log(chalk.cyan(`🤖 Autonomous Model System initialized with ${this.providerName}`));
   }
 
   /**
@@ -45,23 +65,34 @@ class AutonomousModelSystem {
    * @param {string} projectPath - Project root path
    */
   async generateMissingModels(requirements, projectPath) {
+    logger.info('Starting autonomous model generation', {
+      projectPath: projectPath,
+      requirementsProvided: !!requirements
+    });
+
     console.log(chalk.cyan('\n🔍 Starting autonomous model generation...\n'));
 
     try {
       // Step 1: Analyze existing project
+      logger.debug('Analyzing existing project structure');
       const projectAnalysis = await this.discovery.analyzeProject(projectPath);
 
       // Step 2: Discover required models from requirements
+      logger.debug('Discovering required models from requirements');
       const requiredModels = await this.discovery.discoverModels(requirements);
 
       // Step 3: Determine which models are missing
       console.log(chalk.cyan('\n📋 Checking existing models...\n'));
+      logger.debug('Checking for missing models');
       const missingModels = await this.discovery.getMissingModels(
         requiredModels,
         projectPath
       );
 
       if (missingModels.length === 0) {
+        logger.info('All required models already exist', {
+          totalModels: requiredModels.length
+        });
         console.log(chalk.green('\n✨ All required models already exist!\n'));
         return {
           success: true,
@@ -71,12 +102,18 @@ class AutonomousModelSystem {
         };
       }
 
+      logger.info(`Found missing models`, {
+        missingCount: missingModels.length,
+        models: missingModels.map(m => m.name)
+      });
+
       console.log(chalk.yellow(`\n⚠️  Found ${missingModels.length} missing models\n`));
 
       // Step 4: Enrich models with AI if enabled
       let enrichedModels = missingModels;
       if (this.options.autoEnrich) {
         console.log(chalk.cyan('🧠 Enriching models with AI suggestions...\n'));
+        logger.debug('Enriching models with AI suggestions');
         enrichedModels = await this.enrichModels(missingModels, requirements);
       }
 

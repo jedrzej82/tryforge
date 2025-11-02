@@ -4,6 +4,8 @@
  */
 
 const chalk = require('chalk');
+const logger = require('../../utils/logger');
+const { retryWithBackoff, errorHandler } = require('../../utils/error-handler');
 
 class OpenRouterAPI {
   constructor() {
@@ -21,6 +23,10 @@ class OpenRouterAPI {
     this.apiKey = process.env.OPENROUTER_API_KEY;
 
     if (!this.apiKey || this.apiKey.includes('your-key-here')) {
+      logger.warn('OPENROUTER_API_KEY not set. Using mock mode.', {
+        service: 'OpenRouter',
+        mockMode: true
+      });
       console.warn(chalk.yellow('⚠️  OPENROUTER_API_KEY not set. Using mock mode.'));
       this.mockMode = true;
       return;
@@ -29,6 +35,12 @@ class OpenRouterAPI {
     this.mockMode = false;
     this.appName = process.env.APP_NAME || 'TryForge';
     this.siteUrl = process.env.SITE_URL || 'https://github.com/tryforge/tryforge';
+
+    logger.info('OpenRouter API initialized successfully', {
+      service: 'OpenRouter',
+      defaultModel: this.defaultModel,
+      appName: this.appName
+    });
   }
 
   /**

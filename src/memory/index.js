@@ -11,7 +11,7 @@ class MemorySystem {
   constructor(projectPath = process.cwd()) {
     this.projectPath = projectPath;
     this.memoryDir = path.join(projectPath, '.bolt-memory');
-    this.ensure Directories();
+    this.ensureDirectories();
   }
 
   /**

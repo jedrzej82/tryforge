@@ -6,6 +6,8 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const chalk = require('chalk');
 const ora = require('ora');
+const logger = require('../../utils/logger');
+const { AIServiceError, retryWithBackoff, errorHandler } = require('../../utils/error-handler');
 
 class ClaudeAPI {
   constructor() {
@@ -34,16 +36,32 @@ class ClaudeAPI {
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey || apiKey.includes('your-key-here')) {
+      logger.warn('ANTHROPIC_API_KEY not set. Using mock mode.', {
+        authMode: 'api',
+        mockMode: true
+      });
       console.warn(chalk.yellow('⚠️  ANTHROPIC_API_KEY not set. Using mock mode.'));
       this.mockMode = true;
       return;
     }
 
-    this.client = new Anthropic({
-      apiKey: apiKey,
-    });
-    this.authMode = 'api';
-    this.mockMode = false;
+    try {
+      this.client = new Anthropic({
+        apiKey: apiKey,
+      });
+      this.authMode = 'api';
+      this.mockMode = false;
+      logger.info('Claude API initialized successfully', {
+        authMode: 'api',
+        model: this.model
+      });
+    } catch (error) {
+      logger.error('Failed to initialize Claude API', {
+        error: error.message,
+        authMode: 'api'
+      });
+      this.mockMode = true;
+    }
   }
 
   /**
@@ -54,25 +72,42 @@ class ClaudeAPI {
     const organizationId = process.env.CLAUDE_ORGANIZATION_ID;
 
     if (!sessionToken || sessionToken.includes('your-session-token-here')) {
+      logger.warn('CLAUDE_SESSION_TOKEN not set. Using mock mode.', {
+        authMode: 'subscription',
+        mockMode: true
+      });
       console.warn(chalk.yellow('⚠️  CLAUDE_SESSION_TOKEN not set. Using mock mode.'));
       this.mockMode = true;
       return;
     }
 
-    // For subscription mode, we'll use the Anthropic SDK but with custom headers
-    // The SDK supports this via defaultHeaders option
-    this.client = new Anthropic({
-      apiKey: sessionToken, // Session token can be used as API key in some cases
-      defaultHeaders: {
-        'anthropic-version': '2023-06-01',
-        'cookie': `sessionKey=${sessionToken}`,
-        ...(organizationId && { 'anthropic-organization': organizationId }),
-      },
-    });
-    this.authMode = 'subscription';
-    this.sessionToken = sessionToken;
-    this.organizationId = organizationId;
-    this.mockMode = false;
+    try {
+      // For subscription mode, we'll use the Anthropic SDK but with custom headers
+      // The SDK supports this via defaultHeaders option
+      this.client = new Anthropic({
+        apiKey: sessionToken, // Session token can be used as API key in some cases
+        defaultHeaders: {
+          'anthropic-version': '2023-06-01',
+          'cookie': `sessionKey=${sessionToken}`,
+          ...(organizationId && { 'anthropic-organization': organizationId }),
+        },
+      });
+      this.authMode = 'subscription';
+      this.sessionToken = sessionToken;
+      this.organizationId = organizationId;
+      this.mockMode = false;
+      logger.info('Claude API initialized with subscription mode', {
+        authMode: 'subscription',
+        hasOrganizationId: !!organizationId,
+        model: this.model
+      });
+    } catch (error) {
+      logger.error('Failed to initialize Claude subscription mode', {
+        error: error.message,
+        authMode: 'subscription'
+      });
+      this.mockMode = true;
+    }
   }
 
   /**
@@ -83,9 +118,16 @@ class ClaudeAPI {
    */
   async *generateCodeStream(prompt, options = {}) {
     if (this.mockMode) {
+      logger.debug('Using mock mode for streaming generation');
       yield* this.mockGenerateStream(prompt);
       return;
     }
+
+    logger.logAIRequest('Claude', this.model, 'streaming_generation', {
+      promptLength: prompt.length,
+      type: options.type,
+      maxTokens: options.maxTokens || 4096
+    });
 
     try {
       const stream = await this.client.messages.stream({
@@ -105,8 +147,23 @@ class ClaudeAPI {
           yield chunk.delta.text;
         }
       }
+
+      logger.logAIResponse('Claude', true, {
+        operation: 'streaming_generation',
+        type: options.type
+      });
     } catch (error) {
-      console.error(chalk.red(`Claude API error: ${error.message}`));
+      logger.error('Claude API streaming error', {
+        error: error.message,
+        model: this.model,
+        promptLength: prompt.length
+      });
+
+      errorHandler.handleAIError(error, 'Claude', 'streaming generation', {
+        silent: true
+      });
+
+      console.error(chalk.yellow('⚠️  Claude API error. Falling back to mock mode.'));
       yield* this.mockGenerateStream(prompt);
     }
   }
@@ -119,25 +176,65 @@ class ClaudeAPI {
    */
   async generateCode(prompt, options = {}) {
     if (this.mockMode) {
+      logger.debug('Using mock mode for code generation');
       return this.mockGenerate(prompt, options);
     }
 
+    logger.logAIRequest('Claude', this.model, 'code_generation', {
+      promptLength: prompt.length,
+      type: options.type,
+      maxTokens: options.maxTokens || 4096
+    });
+
     try {
-      const message = await this.client.messages.create({
-        model: this.model,
-        max_tokens: options.maxTokens || 4096,
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        system: this.getSystemPrompt(options.type),
+      // Use retry with exponential backoff for resilience
+      const message = await retryWithBackoff(
+        async () => {
+          return await this.client.messages.create({
+            model: this.model,
+            max_tokens: options.maxTokens || 4096,
+            messages: [
+              {
+                role: 'user',
+                content: prompt,
+              },
+            ],
+            system: this.getSystemPrompt(options.type),
+          });
+        },
+        {
+          maxRetries: 3,
+          initialDelay: 1000,
+          onRetry: (error, attempt, maxRetries) => {
+            logger.warn(`Retrying Claude API request (${attempt}/${maxRetries})`, {
+              error: error.message,
+              model: this.model
+            });
+            console.log(chalk.yellow(`⏳ Retrying... (${attempt}/${maxRetries})`));
+          }
+        }
+      );
+
+      logger.logAIResponse('Claude', true, {
+        operation: 'code_generation',
+        type: options.type,
+        responseLength: message.content[0].text.length
       });
 
       return message.content[0].text;
     } catch (error) {
-      console.error(chalk.red(`Claude API error: ${error.message}`));
+      logger.error('Claude API error after retries', {
+        error: error.message,
+        model: this.model,
+        promptLength: prompt.length,
+        stack: error.stack
+      });
+
+      errorHandler.handleAIError(error, 'Claude', 'code generation', {
+        silent: true
+      });
+
+      console.error(chalk.yellow('⚠️  Claude API error after retries. Falling back to mock mode.'));
       return this.mockGenerate(prompt, options);
     }
   }
