@@ -1,0 +1,33 @@
+{
+  "name": "nextjs-14",
+  "displayName": "Next.js 14 (App Router)",
+  "description": "Modern Next.js 14 application with App Router, TypeScript, and Server Components",
+  "version": "1.0.0",
+  "type": "fullstack",
+  "features": [
+    "nextjs-14",
+    "app-router",
+    "typescript",
+    "server-components",
+    "tailwindcss",
+    "api-routes"
+  ],
+  "dependencies": {
+    "next": "^14.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "typescript": "^5.3.3",
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.0.4"
+  }
+}

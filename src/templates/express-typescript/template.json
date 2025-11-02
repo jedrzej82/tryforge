@@ -1,0 +1,25 @@
+{
+  "name": "express-typescript",
+  "displayName": "Express + TypeScript",
+  "description": "Production-ready Express.js backend with TypeScript, Prisma, and JWT auth",
+  "version": "1.0.0",
+  "type": "backend",
+  "features": [
+    "express",
+    "typescript",
+    "prisma",
+    "jwt-auth",
+    "validation",
+    "logging",
+    "testing",
+    "rate-limiting",
+    "security"
+  ],
+  "tags": ["backend", "api", "rest", "typescript", "express"],
+  "author": "TryForge",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tryforge/templates"
+  }
+}

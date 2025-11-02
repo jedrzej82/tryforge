@@ -272,7 +272,10 @@ Return enhanced model as JSON with same structure but improved.`;
     const analysis = {
       existingModels: [],
       missingRelationships: [],
-      suggestedModels: []
+      suggestedModels: [],
+      prismaModels: [],
+      prismaEnums: [],
+      prismaRelations: []
     };
 
     // Find existing models
@@ -291,19 +294,237 @@ Return enhanced model as JSON with same structure but improved.`;
       }
     }
 
-    // Check Prisma schema
+    // Check Prisma schema (Enhanced)
     const prismaPath = path.join(projectPath, 'prisma', 'schema.prisma');
     if (await fs.pathExists(prismaPath)) {
-      const schema = await fs.readFile(prismaPath, 'utf8');
-      const modelMatches = schema.matchAll(/model\s+(\w+)\s*\{/g);
-      for (const match of modelMatches) {
-        analysis.existingModels.push(match[1]);
-      }
+      const prismaAnalysis = await this.analyzePrismaSchema(prismaPath);
+      analysis.prismaModels = prismaAnalysis.models;
+      analysis.prismaEnums = prismaAnalysis.enums;
+      analysis.prismaRelations = prismaAnalysis.relations;
+
+      // Add Prisma models to existing models
+      analysis.existingModels.push(...prismaAnalysis.models.map(m => m.name));
     }
 
     console.log(chalk.green(`  Found ${analysis.existingModels.length} existing models`));
 
+    if (analysis.prismaModels.length > 0) {
+      console.log(chalk.cyan(`  Prisma models: ${analysis.prismaModels.length}`));
+    }
+
     return analysis;
+  }
+
+  /**
+   * Analyze Prisma schema and extract models, enums, and relations
+   */
+  async analyzePrismaSchema(schemaPath) {
+    const fs = require('fs-extra');
+    const schema = await fs.readFile(schemaPath, 'utf8');
+
+    const analysis = {
+      models: [],
+      enums: [],
+      relations: []
+    };
+
+    // Extract models
+    const modelRegex = /model\s+(\w+)\s*\{([^}]+)\}/g;
+    let modelMatch;
+
+    while ((modelMatch = modelRegex.exec(schema)) !== null) {
+      const modelName = modelMatch[1];
+      const modelBody = modelMatch[2];
+
+      const model = {
+        name: modelName,
+        fields: [],
+        relations: []
+      };
+
+      // Extract fields
+      const fieldLines = modelBody.split('\n')
+        .map(line => line.trim())
+        .filter(line => line && !line.startsWith('//') && !line.startsWith('@@'));
+
+      for (const line of fieldLines) {
+        // Skip relation fields (they contain model names)
+        if (line.includes('@relation')) {
+          const relationMatch = line.match(/(\w+)\s+(\w+)(\[\])?\??/);
+          if (relationMatch) {
+            model.relations.push({
+              field: relationMatch[1],
+              model: relationMatch[2],
+              isArray: !!relationMatch[3]
+            });
+          }
+          continue;
+        }
+
+        // Parse regular fields
+        const fieldMatch = line.match(/(\w+)\s+(\w+)(\[\])?\??/);
+        if (fieldMatch) {
+          const field = {
+            name: fieldMatch[1],
+            type: fieldMatch[2],
+            isArray: !!fieldMatch[3],
+            isOptional: line.includes('?'),
+            isId: line.includes('@id'),
+            isUnique: line.includes('@unique'),
+            hasDefault: line.includes('@default'),
+            isUpdatedAt: line.includes('@updatedAt')
+          };
+
+          // Extract default value
+          if (field.hasDefault) {
+            const defaultMatch = line.match(/@default\(([^)]+)\)/);
+            if (defaultMatch) {
+              field.default = defaultMatch[1];
+            }
+          }
+
+          model.fields.push(field);
+        }
+      }
+
+      analysis.models.push(model);
+    }
+
+    // Extract enums
+    const enumRegex = /enum\s+(\w+)\s*\{([^}]+)\}/g;
+    let enumMatch;
+
+    while ((enumMatch = enumRegex.exec(schema)) !== null) {
+      const enumName = enumMatch[1];
+      const enumBody = enumMatch[2];
+
+      const values = enumBody
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line && !line.startsWith('//'));
+
+      analysis.enums.push({
+        name: enumName,
+        values
+      });
+    }
+
+    // Build relation map
+    for (const model of analysis.models) {
+      for (const relation of model.relations) {
+        analysis.relations.push({
+          from: model.name,
+          to: relation.model,
+          field: relation.field,
+          type: relation.isArray ? 'oneToMany' : 'oneToOne'
+        });
+      }
+    }
+
+    return analysis;
+  }
+
+  /**
+   * Parse Prisma schema and extract model definitions
+   */
+  async parsePrismaSchema(schemaPath) {
+    const analysis = await this.analyzePrismaSchema(schemaPath);
+
+    // Convert to model definitions format
+    return analysis.models.map(model => ({
+      name: model.name,
+      purpose: `${model.name} model`,
+      fields: model.fields.map(field => ({
+        name: field.name,
+        type: this.convertPrismaTypeToGeneric(field.type),
+        required: !field.isOptional,
+        unique: field.isUnique,
+        primary: field.isId,
+        default: field.default,
+        updatedAt: field.isUpdatedAt
+      })),
+      relationships: model.relations.map(rel => ({
+        model: rel.model,
+        type: rel.isArray ? 'hasMany' : 'hasOne',
+        foreignKey: `${rel.model.toLowerCase()}Id`
+      }))
+    }));
+  }
+
+  /**
+   * Convert Prisma type to generic type
+   */
+  convertPrismaTypeToGeneric(prismaType) {
+    const typeMap = {
+      'String': 'string',
+      'Int': 'integer',
+      'BigInt': 'bigint',
+      'Float': 'float',
+      'Decimal': 'decimal',
+      'Boolean': 'boolean',
+      'DateTime': 'timestamp',
+      'Json': 'json',
+      'Bytes': 'bytes'
+    };
+
+    return typeMap[prismaType] || 'string';
+  }
+
+  /**
+   * Detect Prisma models from TypeScript Prisma Client usage
+   */
+  async detectPrismaUsage(projectPath) {
+    const fs = require('fs-extra');
+    const path = require('path');
+
+    const detectedModels = new Set();
+
+    // Search for prisma client usage in TypeScript/JavaScript files
+    const searchDirs = [
+      path.join(projectPath, 'src'),
+      path.join(projectPath, 'backend', 'src')
+    ];
+
+    for (const dir of searchDirs) {
+      if (await fs.pathExists(dir)) {
+        await this.searchForPrismaUsage(dir, detectedModels);
+      }
+    }
+
+    return Array.from(detectedModels);
+  }
+
+  /**
+   * Recursively search for Prisma usage
+   */
+  async searchForPrismaUsage(dir, detectedModels) {
+    const fs = require('fs-extra');
+    const path = require('path');
+
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        // Skip node_modules
+        if (entry.name !== 'node_modules') {
+          await this.searchForPrismaUsage(fullPath, detectedModels);
+        }
+      } else if (entry.name.endsWith('.ts') || entry.name.endsWith('.js')) {
+        const content = await fs.readFile(fullPath, 'utf8');
+
+        // Look for prisma.modelName patterns
+        const usageRegex = /prisma\.(\w+)\./g;
+        let match;
+
+        while ((match = usageRegex.exec(content)) !== null) {
+          // Capitalize first letter to match model naming convention
+          const modelName = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+          detectedModels.add(modelName);
+        }
+      }
+    }
   }
 
   /**
