@@ -377,7 +377,7 @@ class IntelligentIDE {
       minified: true,
       treeShaken: true,
       compressed: true,
-      codeS split: true
+      codeSplit: true
     };
   }
 
