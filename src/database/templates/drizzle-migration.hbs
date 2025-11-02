@@ -1,0 +1,37 @@
+/**
+ * Migration: {{name}}
+ * Created: {{timestamp}}
+ * Description: {{description}}
+ * Dependencies: {{#if dependencies}}{{dependencies}}{{else}}none{{/if}}
+ */
+
+import { sql } from 'drizzle-orm';
+import { MySqlDatabase } from 'drizzle-orm/mysql2'; // or PostgresJsDatabase, etc.
+
+export async function up(db: MySqlDatabase): Promise<void> {
+  {{#if up}}
+  {{{up}}}
+  {{else}}
+  // Add your migration code here
+  // Example:
+  // await db.execute(sql`
+  //   CREATE TABLE users (
+  //     id INT PRIMARY KEY AUTO_INCREMENT,
+  //     name VARCHAR(255) NOT NULL,
+  //     email VARCHAR(255) NOT NULL UNIQUE,
+  //     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  //     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  //   )
+  // `);
+  {{/if}}
+}
+
+export async function down(db: MySqlDatabase): Promise<void> {
+  {{#if down}}
+  {{{down}}}
+  {{else}}
+  // Add your rollback code here
+  // Example:
+  // await db.execute(sql`DROP TABLE users`);
+  {{/if}}
+}

@@ -29,6 +29,7 @@
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.0",
+    "@faker-js/faker": "^8.3.1",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
     "chalk": "^4.1.2",

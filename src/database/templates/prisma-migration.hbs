@@ -1,0 +1,24 @@
+/*
+  Migration: {{name}}
+  Created: {{timestamp}}
+  Description: {{description}}
+  Dependencies: {{#if dependencies}}{{dependencies}}{{else}}none{{/if}}
+*/
+
+{{#if up}}
+-- Up Migration
+{{{up}}}
+{{else}}
+-- Add your Prisma migration SQL here
+-- This migration will be applied during 'db:migrate'
+
+{{/if}}
+
+{{#if down}}
+-- Down Migration (for rollback)
+{{{down}}}
+{{else}}
+-- Add your rollback SQL here
+-- This migration will be applied during 'db:rollback'
+
+{{/if}}

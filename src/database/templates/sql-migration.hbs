@@ -1,0 +1,40 @@
+-- Migration: {{name}}
+-- Created: {{timestamp}}
+-- Description: {{description}}
+-- Database: {{database}}
+-- Dependencies: {{#if dependencies}}{{dependencies}}{{else}}none{{/if}}
+
+-- =============================================================================
+-- UP MIGRATION
+-- =============================================================================
+-- Add your SQL migration here
+-- This will be executed when running 'db:migrate'
+
+{{#if up}}
+{{{up}}}
+{{else}}
+-- Example:
+-- CREATE TABLE users (
+--   id SERIAL PRIMARY KEY,
+--   name VARCHAR(255) NOT NULL,
+--   email VARCHAR(255) NOT NULL UNIQUE,
+--   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+--
+-- CREATE INDEX idx_users_email ON users(email);
+{{/if}}
+
+-- =============================================================================
+-- DOWN MIGRATION (ROLLBACK)
+-- =============================================================================
+-- Add your SQL rollback here
+-- This will be executed when running 'db:rollback'
+
+{{#if down}}
+{{{down}}}
+{{else}}
+-- Example:
+-- DROP INDEX IF EXISTS idx_users_email;
+-- DROP TABLE IF EXISTS users;
+{{/if}}

@@ -1,0 +1,53 @@
+/**
+ * Migration: {{name}}
+ * Created: {{timestamp}}
+ * Description: {{description}}
+ * Dependencies: {{#if dependencies}}{{dependencies}}{{else}}none{{/if}}
+ */
+
+'use strict';
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    {{#if up}}
+    {{{up}}}
+    {{else}}
+    // Add your migration code here
+    // Example:
+    // await queryInterface.createTable('users', {
+    //   id: {
+    //     type: Sequelize.INTEGER,
+    //     primaryKey: true,
+    //     autoIncrement: true
+    //   },
+    //   name: {
+    //     type: Sequelize.STRING,
+    //     allowNull: false
+    //   },
+    //   email: {
+    //     type: Sequelize.STRING,
+    //     allowNull: false,
+    //     unique: true
+    //   },
+    //   createdAt: {
+    //     type: Sequelize.DATE,
+    //     allowNull: false
+    //   },
+    //   updatedAt: {
+    //     type: Sequelize.DATE,
+    //     allowNull: false
+    //   }
+    // });
+    {{/if}}
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    {{#if down}}
+    {{{down}}}
+    {{else}}
+    // Add your rollback code here
+    // Example:
+    // await queryInterface.dropTable('users');
+    {{/if}}
+  }
+};

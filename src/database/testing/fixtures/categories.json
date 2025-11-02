@@ -1,0 +1,92 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Electronics",
+      "slug": "electronics",
+      "description": "Electronic devices and accessories",
+      "parent_id": null,
+      "is_active": true,
+      "sort_order": 1,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "name": "Computers",
+      "slug": "computers",
+      "description": "Laptops, desktops, and accessories",
+      "parent_id": 1,
+      "is_active": true,
+      "sort_order": 1,
+      "created_at": "2024-01-02T00:00:00.000Z",
+      "updated_at": "2024-01-02T00:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "name": "Accessories",
+      "slug": "accessories",
+      "description": "Computer accessories and peripherals",
+      "parent_id": 1,
+      "is_active": true,
+      "sort_order": 2,
+      "created_at": "2024-01-03T00:00:00.000Z",
+      "updated_at": "2024-01-03T00:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "name": "Home & Garden",
+      "slug": "home-garden",
+      "description": "Home and garden products",
+      "parent_id": null,
+      "is_active": true,
+      "sort_order": 2,
+      "created_at": "2024-01-04T00:00:00.000Z",
+      "updated_at": "2024-01-04T00:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "name": "Furniture",
+      "slug": "furniture",
+      "description": "Home and office furniture",
+      "parent_id": 4,
+      "is_active": true,
+      "sort_order": 1,
+      "created_at": "2024-01-05T00:00:00.000Z",
+      "updated_at": "2024-01-05T00:00:00.000Z"
+    },
+    {
+      "id": 6,
+      "name": "Books",
+      "slug": "books",
+      "description": "Books and reading materials",
+      "parent_id": null,
+      "is_active": true,
+      "sort_order": 3,
+      "created_at": "2024-01-06T00:00:00.000Z",
+      "updated_at": "2024-01-06T00:00:00.000Z"
+    },
+    {
+      "id": 7,
+      "name": "Sports & Outdoors",
+      "slug": "sports-outdoors",
+      "description": "Sports equipment and outdoor gear",
+      "parent_id": null,
+      "is_active": true,
+      "sort_order": 4,
+      "created_at": "2024-01-07T00:00:00.000Z",
+      "updated_at": "2024-01-07T00:00:00.000Z"
+    },
+    {
+      "id": 8,
+      "name": "Clearance",
+      "slug": "clearance",
+      "description": "Clearance and discontinued items",
+      "parent_id": null,
+      "is_active": false,
+      "sort_order": 99,
+      "created_at": "2024-01-08T00:00:00.000Z",
+      "updated_at": "2024-01-08T00:00:00.000Z"
+    }
+  ]
+}

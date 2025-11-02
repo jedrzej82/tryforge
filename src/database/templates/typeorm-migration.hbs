@@ -1,0 +1,40 @@
+/**
+ * Migration: {{name}}
+ * Created: {{timestamp}}
+ * Description: {{description}}
+ * Dependencies: {{#if dependencies}}{{dependencies}}{{else}}none{{/if}}
+ */
+
+import { MigrationInterface, QueryRunner } from 'typeorm';
+
+export class {{className}}{{timestamp}} implements MigrationInterface {
+  name = '{{name}}_{{timestamp}}';
+
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    {{#if up}}
+    {{{up}}}
+    {{else}}
+    // Add your migration code here
+    // Example:
+    // await queryRunner.query(`
+    //   CREATE TABLE "users" (
+    //     "id" SERIAL PRIMARY KEY,
+    //     "name" VARCHAR NOT NULL,
+    //     "email" VARCHAR NOT NULL UNIQUE,
+    //     "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+    //     "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW()
+    //   )
+    // `);
+    {{/if}}
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    {{#if down}}
+    {{{down}}}
+    {{else}}
+    // Add your rollback code here
+    // Example:
+    // await queryRunner.query(`DROP TABLE "users"`);
+    {{/if}}
+  }
+}

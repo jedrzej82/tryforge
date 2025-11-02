@@ -1,0 +1,85 @@
+/**
+ * {{className}}
+ *
+ * {{description}}
+ */
+
+const BaseSeeder = require('../base-seeder');
+const DataGenerator = require('../generators/data-generator');
+
+class {{className}} extends BaseSeeder {
+  constructor() {
+    super();
+    this.name = '{{className}}';
+    this.dependencies = []; // Add dependencies here, e.g., ['UsersSeeder']
+    this.environments = ['development', 'staging'];
+    this.priority = 10; // Lower numbers run first
+  }
+
+  /**
+   * Run the seeder
+   * @param {Object} db - Database connection
+   */
+  async run(db) {
+    this.log('Seeding {{tableName}}...');
+
+    try {
+      // TODO: Generate data
+      // Example:
+      // const data = DataGenerator.generateCustom({
+      //   name: { type: 'string' },
+      //   email: { type: 'email' },
+      //   age: { type: 'number', options: { min: 18, max: 80 } }
+      // }, 10);
+
+      // TODO: Insert data into database
+      // Example for PostgreSQL:
+      // for (const item of data) {
+      //   await db.query(
+      //     'INSERT INTO {{tableName}} (column1, column2) VALUES ($1, $2)',
+      //     [item.column1, item.column2]
+      //   );
+      // }
+
+      // Example for ORM:
+      // await db.{{tableName}}.createMany(data);
+
+      // Example for MongoDB:
+      // await db.collection('{{tableName}}').insertMany(data);
+
+      this.log('Seeding {{tableName}} complete!', 'success');
+
+    } catch (error) {
+      this.log(`Error seeding {{tableName}}: ${error.message}`, 'error');
+      throw error;
+    }
+  }
+
+  /**
+   * Rollback the seeder
+   * @param {Object} db - Database connection
+   */
+  async rollback(db) {
+    this.log('Rolling back {{tableName}}...');
+
+    try {
+      // TODO: Remove seeded data
+      // Example for PostgreSQL:
+      // await db.query('DELETE FROM {{tableName}}');
+
+      // Example for ORM:
+      // await db.{{tableName}}.deleteMany({});
+
+      // Example for MongoDB:
+      // await db.collection('{{tableName}}').deleteMany({});
+
+      this.log('{{tableName}} rollback complete!', 'success');
+
+    } catch (error) {
+      this.log(`Error rolling back {{tableName}}: ${error.message}`, 'error');
+      throw error;
+    }
+  }
+}
+
+module.exports = {{className}};
