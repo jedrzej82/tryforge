@@ -128,6 +128,16 @@ program
     await DbCommand.seed();
   });
 
+// ADMIN Command
+program
+  .command('admin')
+  .description('Open admin panel for API configuration')
+  .option('-p, --port <port>', 'Port for admin panel', '3333')
+  .action(async (options) => {
+    const AdminCommand = require('./commands/admin');
+    await AdminCommand.execute(options);
+  });
+
 // PREVIEW Command
 program
   .command('preview [path]')
@@ -177,6 +187,7 @@ if (process.argv.length === 2) {
   console.log(chalk.gray('  • One-click deployment to Vercel/Netlify/Railway'));
   console.log(chalk.gray('  • AI-powered auto-fix and code improvements\n'));
   console.log(chalk.white('🚀 Quick Start:'));
+  console.log(chalk.gray('  $ tryforge admin                      # Configure API keys'));
   console.log(chalk.gray('  $ tryforge create "Blog platform"     # Create app'));
   console.log(chalk.gray('  $ tryforge preview                    # Live preview'));
   console.log(chalk.gray('  $ tryforge generate component "..."   # AI code gen'));
