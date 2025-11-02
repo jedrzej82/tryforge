@@ -304,12 +304,122 @@ Style: ${architecture.design?.style || 'modern'} with ${architecture.design?.col
    * Deploy application locally
    */
   async deploy(results) {
-    // Simplified - actual implementation would start servers
+    const ProjectGenerator = require('../automation/project-generator');
+    const ora = require('ora');
+    const generator = new ProjectGenerator(results.projectName, results.architecture);
+
+    const spinner = ora('Generating project files...').start();
+
+    // Generate actual project files
+    await generator.generate(results);
+    spinner.succeed('Project files generated');
+
+    // Install dependencies
+    spinner.start('Installing dependencies...');
+    await this.installDependencies(results.projectName);
+    spinner.succeed('Dependencies installed');
+
+    // Setup database
+    spinner.start('Setting up database...');
+    await this.setupDatabase(results.projectName);
+    spinner.succeed('Database ready');
+
     return {
       frontendUrl: 'http://localhost:5173',
       backendUrl: 'http://localhost:3000',
-      databaseUrl: 'localhost:5432/app_db',
+      databaseUrl: `localhost:5432/${results.projectName}_db`,
+      projectPath: generator.projectPath,
     };
+  }
+
+  /**
+   * Install dependencies for generated project
+   */
+  async installDependencies(projectName) {
+    const { spawn } = require('child_process');
+    const path = require('path');
+
+    const projectPath = path.join(process.cwd(), projectName);
+
+    // Install frontend dependencies
+    await this.runNpmInstall(path.join(projectPath, 'frontend'));
+
+    // Install backend dependencies
+    await this.runNpmInstall(path.join(projectPath, 'backend'));
+  }
+
+  /**
+   * Run npm install in directory
+   */
+  runNpmInstall(dir) {
+    const { spawn } = require('child_process');
+    const fs = require('fs-extra');
+
+    if (!fs.existsSync(dir)) return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+      const npm = spawn('npm', ['install'], {
+        cwd: dir,
+        stdio: 'pipe',
+      });
+
+      npm.on('close', (code) => {
+        if (code === 0) resolve();
+        else reject(new Error('npm install failed'));
+      });
+
+      npm.on('error', reject);
+    });
+  }
+
+  /**
+   * Setup database for project
+   */
+  async setupDatabase(projectName) {
+    const { Client } = require('pg');
+    const fs = require('fs-extra');
+    const path = require('path');
+
+    try {
+      // Create database
+      const adminClient = new Client({
+        host: 'localhost',
+        port: 5432,
+        user: 'devuser',
+        password: 'devpass123',
+        database: 'postgres',
+      });
+
+      await adminClient.connect();
+
+      try {
+        await adminClient.query(`CREATE DATABASE ${projectName}_db`);
+      } catch (error) {
+        if (error.code !== '42P04') throw error; // Ignore if exists
+      }
+
+      await adminClient.end();
+
+      // Run schema
+      const schemaPath = path.join(process.cwd(), projectName, 'backend', 'sql', 'schema.sql');
+      if (await fs.pathExists(schemaPath)) {
+        const schema = await fs.readFile(schemaPath, 'utf8');
+
+        const dbClient = new Client({
+          host: 'localhost',
+          port: 5432,
+          user: 'devuser',
+          password: 'devpass123',
+          database: `${projectName}_db`,
+        });
+
+        await dbClient.connect();
+        await dbClient.query(schema);
+        await dbClient.end();
+      }
+    } catch (error) {
+      console.warn('Database setup warning:', error.message);
+    }
   }
 
   /**
