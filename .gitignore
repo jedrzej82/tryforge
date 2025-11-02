@@ -21,9 +21,17 @@ tmp/
 temp/
 .tmp/
 
-# Node modules (if any examples)
+# Node modules
 node_modules/
 package-lock.json
+yarn.lock
+
+# TryForge specific
+.tryforge-cache/
+.bolt-memory/backups/
+.github-session/
+.tryforge/encryption.key
+.tryforge/config.json
 
 # Environment files
 .env

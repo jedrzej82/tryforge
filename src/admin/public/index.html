@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TryForge Admin Panel</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-hover: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border: #334155;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      background: var(--bg-card);
+      border-bottom: 2px solid var(--primary);
+      padding: 1.5rem 0;
+      margin-bottom: 2rem;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo {
+      font-size: 2.5rem;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      padding: 1rem 1.5rem;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 1rem;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab:hover {
+      color: var(--text-primary);
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .input-with-test {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .input-with-test input {
+      flex: 1;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    .btn-test {
+      padding: 0.75rem 1rem;
+      white-space: nowrap;
+    }
+
+    .btn-save {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .alert {
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideIn 0.3s;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--error);
+      color: var(--error);
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid var(--warning);
+      color: var(--warning);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .masked-value {
+      font-family: monospace;
+      color: var(--text-secondary);
+    }
+
+    .help-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+    }
+
+    .help-text a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .help-text a:hover {
+      text-decoration: underline;
+    }
+
+    .spinner {
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .test-result {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .test-result.success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .test-result.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-secondary);
+      margin-top: 3rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-secondary);
+    }
+
+    .icon {
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <h1><span class="logo">🔧</span> TryForge Admin Panel</h1>
+      <div class="status">
+        <span class="status-dot"></span>
+        <span>Server Running</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="alert-container"></div>
+
+    <!-- AI Provider Selector -->
+    <div class="card" style="margin-bottom: 2rem;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>🤖 AI Provider</label>
+        <select id="ai-provider" onchange="handleProviderChange()">
+          <option value="claude">Claude (Anthropic)</option>
+          <option value="openrouter">OpenRouter (Multiple Free Models)</option>
+        </select>
+        <div class="help-text">
+          Choose your AI provider. OpenRouter gives access to multiple free models including MiniMax M2.
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="claude">🤖 Claude</button>
+      <button class="tab" data-tab="openrouter">🌐 OpenRouter</button>
+      <button class="tab" data-tab="deployment">🚀 Deployment</button>
+      <button class="tab" data-tab="github">📦 GitHub</button>
+      <button class="tab" data-tab="database">🗄️ Database</button>
+      <button class="tab" data-tab="settings">⚙️ Settings</button>
+    </div>
+
+    <!-- Claude API Tab -->
+    <div id="tab-claude" class="tab-content active">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">🤖 Claude Configuration</h2>
+        </div>
+
+        <!-- Authentication Mode Selection -->
+        <div class="form-group">
+          <label>Authentication Mode</label>
+          <select id="claude-auth-mode" onchange="toggleClaudeAuthMode()">
+            <option value="api">API Key (Pay-per-use)</option>
+            <option value="subscription">Subscription Token (Claude Pro/Max)</option>
+          </select>
+          <div class="help-text">
+            Choose "API Key" for pay-per-use via Anthropic API, or "Subscription" if you have Claude Pro/Max
+          </div>
+        </div>
+
+        <!-- API Key Mode -->
+        <div id="api-mode-section">
+          <div class="form-group">
+            <label>API Key</label>
+            <div class="input-with-test">
+              <input
+                type="password"
+                id="claude-api-key"
+                placeholder="sk-ant-api03-..."
+              >
+              <button class="btn btn-secondary btn-test" onclick="testKey('claude')">
+                Test
+              </button>
+            </div>
+            <div class="help-text">
+              Get your API key from <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a>
+            </div>
+            <div id="claude-test-result"></div>
+          </div>
+        </div>
+
+        <!-- Subscription Mode -->
+        <div id="subscription-mode-section" style="display: none;">
+          <div class="form-group">
+            <label>Session Token</label>
+            <div class="input-with-test">
+              <input
+                type="password"
+                id="claude-session-token"
+                placeholder="sessKey-ant-..."
+              >
+              <button class="btn btn-secondary btn-test" onclick="testKey('claude-subscription')">
+                Test
+              </button>
+            </div>
+            <div class="help-text">
+              Get session token from Claude.ai browser cookies (sessionKey)
+            </div>
+            <div id="claude-subscription-test-result"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Organization ID (Optional)</label>
+            <input
+              type="text"
+              id="claude-organization-id"
+              placeholder="org-..."
+            >
+            <div class="help-text">
+              Leave empty if not using organization account
+            </div>
+          </div>
+
+          <div class="alert alert-warning">
+            <span class="icon">ℹ️</span>
+            <div>
+              <strong>How to get your Session Token:</strong><br>
+              1. Login to <a href="https://claude.ai" target="_blank">claude.ai</a><br>
+              2. Open browser DevTools (F12)<br>
+              3. Go to Application → Cookies<br>
+              4. Copy the value of "sessionKey" cookie
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OpenRouter Tab -->
+    <div id="tab-openrouter" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">🌐 OpenRouter Configuration</h2>
+        </div>
+
+        <div class="form-group">
+          <label>API Key</label>
+          <div class="input-with-test">
+            <input
+              type="password"
+              id="openrouter-api-key"
+              placeholder="sk-or-v1-..."
+            >
+            <button class="btn btn-secondary btn-test" onclick="testKey('openrouter')">
+              Test
+            </button>
+          </div>
+          <div class="help-text">
+            Get your free API key from <a href="https://openrouter.ai/keys" target="_blank">OpenRouter Dashboard</a>
+          </div>
+          <div id="openrouter-test-result"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Default Model</label>
+          <select id="openrouter-model">
+            <option value="minimax/minimax-01">🆓 MiniMax M2 (200K context) - FREE</option>
+            <option value="google/gemini-flash-1.5">🆓 Google Gemini Flash 1.5 (1M context) - FREE</option>
+            <option value="google/gemini-flash-1.5-8b">🆓 Google Gemini Flash 1.5 8B (1M context) - FREE</option>
+            <option value="meta-llama/llama-3.2-3b-instruct:free">🆓 Meta Llama 3.2 3B (128K context) - FREE</option>
+            <option value="meta-llama/llama-3.1-8b-instruct:free">🆓 Meta Llama 3.1 8B (128K context) - FREE</option>
+            <option value="microsoft/phi-3-medium-128k-instruct:free">🆓 Microsoft Phi-3 Medium (128K context) - FREE</option>
+            <option value="qwen/qwen-2-7b-instruct:free">🆓 Qwen 2 7B (32K context) - FREE</option>
+          </select>
+          <div class="help-text">
+            All models marked 🆓 are completely free! MiniMax M2 is recommended for best performance.
+          </div>
+        </div>
+
+        <div class="alert alert-success">
+          <span class="icon">✨</span>
+          <div>
+            <strong>Why OpenRouter?</strong><br>
+            • Access to 7+ free AI models<br>
+            • No API costs for free models<br>
+            • MiniMax M2 with 200K context window<br>
+            • Google Gemini with 1M context window<br>
+            • Easy switching between models<br>
+            • Perfect for development and production
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deployment Tab -->
+    <div id="tab-deployment" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">▲ Vercel</h2>
+          </div>
+          <div class="form-group">
+            <label>Access Token</label>
+            <div class="input-with-test">
+              <input
+                type="password"
+                id="vercel-token"
+                placeholder="Enter Vercel token"
+              >
+              <button class="btn btn-secondary btn-test" onclick="testKey('vercel')">
+                Test
+              </button>
+            </div>
+            <div class="help-text">
+              Get token from <a href="https://vercel.com/account/tokens" target="_blank">Vercel Settings</a>
+            </div>
+            <div id="vercel-test-result"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">🌐 Netlify</h2>
+          </div>
+          <div class="form-group">
+            <label>Access Token</label>
+            <div class="input-with-test">
+              <input
+                type="password"
+                id="netlify-token"
+                placeholder="Enter Netlify token"
+              >
+              <button class="btn btn-secondary btn-test" onclick="testKey('netlify')">
+                Test
+              </button>
+            </div>
+            <div class="help-text">
+              Get token from <a href="https://app.netlify.com/user/applications#personal-access-tokens" target="_blank">Netlify Settings</a>
+            </div>
+            <div id="netlify-test-result"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">🚂 Railway</h2>
+          </div>
+          <div class="form-group">
+            <label>Access Token</label>
+            <div class="input-with-test">
+              <input
+                type="password"
+                id="railway-token"
+                placeholder="Enter Railway token"
+              >
+              <button class="btn btn-secondary btn-test" onclick="testKey('railway')">
+                Test
+              </button>
+            </div>
+            <div class="help-text">
+              Get token from <a href="https://railway.app/account/tokens" target="_blank">Railway Settings</a>
+            </div>
+            <div id="railway-test-result"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">🎨 Render</h2>
+          </div>
+          <div class="form-group">
+            <label>API Key</label>
+            <div class="input-with-test">
+              <input
+                type="password"
+                id="render-api-key"
+                placeholder="Enter Render API key"
+              >
+              <button class="btn btn-secondary btn-test" onclick="testKey('render')">
+                Test
+              </button>
+            </div>
+            <div class="help-text">
+              Get API key from <a href="https://dashboard.render.com/account/api-keys" target="_blank">Render Dashboard</a>
+            </div>
+            <div id="render-test-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GitHub Tab -->
+    <div id="tab-github" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📦 GitHub Configuration</h2>
+        </div>
+        <div class="form-group">
+          <label>Username</label>
+          <input
+            type="text"
+            id="github-username"
+            placeholder="your-username"
+          >
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            id="github-email"
+            placeholder="your-email@example.com"
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Database Tab -->
+    <div id="tab-database" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">🗄️ Database Configuration</h2>
+        </div>
+        <div class="form-group">
+          <label>Database URL</label>
+          <input
+            type="text"
+            id="database-url"
+            placeholder="postgresql://user:password@localhost:5432/dbname"
+          >
+          <div class="help-text">
+            PostgreSQL connection string
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Database User</label>
+          <input
+            type="text"
+            id="database-user"
+            placeholder="devuser"
+          >
+        </div>
+        <div class="form-group">
+          <label>Redis URL (Optional)</label>
+          <input
+            type="text"
+            id="redis-url"
+            placeholder="redis://localhost:6379"
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="tab-settings" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">⚙️ Application Settings</h2>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Environment</label>
+            <select id="node-env">
+              <option value="development">Development</option>
+              <option value="production">Production</option>
+              <option value="test">Test</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Log Level</label>
+            <select id="log-level">
+              <option value="debug">Debug</option>
+              <option value="info">Info</option>
+              <option value="warn">Warning</option>
+              <option value="error">Error</option>
+            </select>
+          </div>
+        </div>
+
+        <h3 style="margin: 2rem 0 1rem; color: var(--text-primary);">Port Configuration</h3>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Frontend Port</label>
+            <input type="number" id="frontend-port" placeholder="5173">
+          </div>
+          <div class="form-group">
+            <label>Backend Port</label>
+            <input type="number" id="backend-port" placeholder="3000">
+          </div>
+          <div class="form-group">
+            <label>Preview Port</label>
+            <input type="number" id="preview-port" placeholder="4000">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="playwright-headless" style="width: auto; margin-right: 0.5rem;">
+            Run Playwright in headless mode
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Button -->
+    <div style="text-align: center; margin-top: 2rem;">
+      <button class="btn btn-primary btn-save" onclick="saveConfig()">
+        <span>💾</span>
+        <span>Save Configuration</span>
+      </button>
+    </div>
+  </div>
+
+  <footer>
+    <p>TryForge Admin Panel v1.0.0 | Built with ❤️ for developers</p>
+  </footer>
+
+  <script>
+    let currentConfig = {};
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabName = tab.dataset.tab;
+
+        // Update active tab
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // Update active content
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+      });
+    });
+
+    // Toggle Claude authentication mode
+    function toggleClaudeAuthMode() {
+      const authMode = document.getElementById('claude-auth-mode').value;
+      const apiSection = document.getElementById('api-mode-section');
+      const subscriptionSection = document.getElementById('subscription-mode-section');
+
+      if (authMode === 'subscription') {
+        apiSection.style.display = 'none';
+        subscriptionSection.style.display = 'block';
+      } else {
+        apiSection.style.display = 'block';
+        subscriptionSection.style.display = 'none';
+      }
+    }
+
+    // Handle AI provider change
+    function handleProviderChange() {
+      const provider = document.getElementById('ai-provider').value;
+
+      // Show appropriate tab
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      const targetTab = provider === 'openrouter' ? 'openrouter' : 'claude';
+      document.querySelector(`[data-tab="${targetTab}"]`).classList.add('active');
+      document.getElementById(`tab-${targetTab}`).classList.add('active');
+    }
+
+    // Load configuration
+    async function loadConfig() {
+      try {
+        const response = await fetch('/api/config');
+        const data = await response.json();
+
+        if (data.success) {
+          currentConfig = data.config;
+          populateForm(data.config);
+        } else {
+          showAlert('Failed to load configuration', 'error');
+        }
+      } catch (error) {
+        showAlert('Error loading configuration: ' + error.message, 'error');
+      }
+    }
+
+    // Populate form with config data
+    function populateForm(config) {
+      // AI Provider
+      document.getElementById('ai-provider').value = config.aiProvider || 'claude';
+
+      // Claude
+      document.getElementById('claude-auth-mode').value = config.claude?.authMode || 'api';
+      if (config.claude?.apiKey) {
+        document.getElementById('claude-api-key').placeholder = config.claude.apiKey;
+      }
+      if (config.claude?.sessionToken) {
+        document.getElementById('claude-session-token').placeholder = config.claude.sessionToken;
+      }
+      document.getElementById('claude-organization-id').value = config.claude?.organizationId || '';
+
+      // Toggle mode display
+      toggleClaudeAuthMode();
+
+      // OpenRouter
+      if (config.openrouter?.apiKey) {
+        document.getElementById('openrouter-api-key').placeholder = config.openrouter.apiKey;
+      }
+      document.getElementById('openrouter-model').value = config.openrouter?.model || 'minimax/minimax-01';
+
+      // Deployment
+      if (config.deployment?.vercel) {
+        document.getElementById('vercel-token').placeholder = config.deployment.vercel;
+      }
+      if (config.deployment?.netlify) {
+        document.getElementById('netlify-token').placeholder = config.deployment.netlify;
+      }
+      if (config.deployment?.railway) {
+        document.getElementById('railway-token').placeholder = config.deployment.railway;
+      }
+      if (config.deployment?.render) {
+        document.getElementById('render-api-key').placeholder = config.deployment.render;
+      }
+
+      // GitHub
+      document.getElementById('github-username').value = config.github?.username || '';
+      document.getElementById('github-email').value = config.github?.email || '';
+
+      // Database
+      document.getElementById('database-url').value = config.database?.url || '';
+      document.getElementById('database-user').value = config.database?.user || '';
+      document.getElementById('redis-url').value = config.redis?.url || '';
+
+      // Settings
+      document.getElementById('node-env').value = config.settings?.nodeEnv || 'development';
+      document.getElementById('log-level').value = config.settings?.logLevel || 'info';
+      document.getElementById('frontend-port').value = config.ports?.frontend || '5173';
+      document.getElementById('backend-port').value = config.ports?.backend || '3000';
+      document.getElementById('preview-port').value = config.ports?.preview || '4000';
+      document.getElementById('playwright-headless').checked = config.settings?.playwrightHeadless || false;
+    }
+
+    // Save configuration
+    async function saveConfig() {
+      const updates = {
+        aiProvider: document.getElementById('ai-provider').value,
+        claude: {
+          authMode: document.getElementById('claude-auth-mode').value,
+          apiKey: document.getElementById('claude-api-key').value || undefined,
+          sessionToken: document.getElementById('claude-session-token').value || undefined,
+          organizationId: document.getElementById('claude-organization-id').value || undefined
+        },
+        openrouter: {
+          apiKey: document.getElementById('openrouter-api-key').value || undefined,
+          model: document.getElementById('openrouter-model').value
+        },
+        github: {
+          username: document.getElementById('github-username').value,
+          email: document.getElementById('github-email').value
+        },
+        deployment: {
+          vercel: document.getElementById('vercel-token').value || undefined,
+          netlify: document.getElementById('netlify-token').value || undefined,
+          railway: document.getElementById('railway-token').value || undefined,
+          render: document.getElementById('render-api-key').value || undefined
+        },
+        database: {
+          url: document.getElementById('database-url').value,
+          user: document.getElementById('database-user').value
+        },
+        redis: {
+          url: document.getElementById('redis-url').value
+        },
+        ports: {
+          frontend: document.getElementById('frontend-port').value,
+          backend: document.getElementById('backend-port').value,
+          preview: document.getElementById('preview-port').value
+        },
+        settings: {
+          nodeEnv: document.getElementById('node-env').value,
+          logLevel: document.getElementById('log-level').value,
+          playwrightHeadless: document.getElementById('playwright-headless').checked
+        }
+      };
+
+      // Remove undefined values
+      Object.keys(updates).forEach(key => {
+        Object.keys(updates[key]).forEach(subKey => {
+          if (updates[key][subKey] === undefined || updates[key][subKey] === '') {
+            delete updates[key][subKey];
+          }
+        });
+      });
+
+      try {
+        const response = await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert('✅ Configuration saved successfully!', 'success');
+          setTimeout(() => loadConfig(), 1000);
+        } else {
+          showAlert('Failed to save configuration: ' + data.message, 'error');
+        }
+      } catch (error) {
+        showAlert('Error saving configuration: ' + error.message, 'error');
+      }
+    }
+
+    // Test API key
+    async function testKey(service) {
+      const keyMap = {
+        'claude': 'claude-api-key',
+        'claude-subscription': 'claude-session-token',
+        'openrouter': 'openrouter-api-key',
+        'vercel': 'vercel-token',
+        'netlify': 'netlify-token',
+        'railway': 'railway-token',
+        'render': 'render-api-key'
+      };
+
+      const inputId = keyMap[service];
+      const input = document.getElementById(inputId);
+      const resultDiv = document.getElementById(`${service}-test-result`);
+      const key = input.value;
+
+      if (!key) {
+        resultDiv.innerHTML = '<div class="test-result error">Please enter a key first</div>';
+        return;
+      }
+
+      resultDiv.innerHTML = '<div class="test-result"><div class="spinner"></div> Testing...</div>';
+
+      try {
+        const response = await fetch('/api/test-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ service, key })
+        });
+
+        const data = await response.json();
+
+        if (data.valid) {
+          resultDiv.innerHTML = `<div class="test-result success">✅ ${data.message}${data.details ? '<br>' + data.details : ''}</div>`;
+        } else {
+          resultDiv.innerHTML = `<div class="test-result error">❌ ${data.message}${data.error ? '<br>' + data.error : ''}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="test-result error">❌ Error: ${error.message}</div>`;
+      }
+    }
+
+    // Show alert
+    function showAlert(message, type = 'success') {
+      const alertContainer = document.getElementById('alert-container');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+
+      const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️';
+      alert.innerHTML = `<span class="icon">${icon}</span><span>${message}</span>`;
+
+      alertContainer.appendChild(alert);
+
+      setTimeout(() => {
+        alert.style.animation = 'slideIn 0.3s reverse';
+        setTimeout(() => alert.remove(), 300);
+      }, 5000);
+    }
+
+    // Load config on page load
+    loadConfig();
+  </script>
+</body>
+</html>
