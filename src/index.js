@@ -19,6 +19,8 @@ const DataVisualization = require('./core/visualization');
 const AdvancedTemplates = require('./core/advanced-templates');
 const AgencyTools = require('./core/agency-tools');
 const FreelanceExtensions = require('./core/freelance-extensions');
+const CompleteCoverage = require('./core/complete-coverage');
+const ConversationalAI = require('./core/conversational-ai');
 const Logger = require('./utils/logger');
 
 class TryForge {
@@ -43,8 +45,10 @@ class TryForge {
     this.templates = new AdvancedTemplates();
     this.agency = new AgencyTools(config);
     this.freelance = new FreelanceExtensions();
+    this.completeCoverage = new CompleteCoverage();
+    this.conversationalAI = new ConversationalAI();
     
-    this.logger.info('✅ TryForge initialized with all 16 modules including Freelance Extensions');
+    this.logger.info('✅ TryForge initialized with all 18 modules including Complete Coverage and Conversational AI');
   }
 
   // Project Management

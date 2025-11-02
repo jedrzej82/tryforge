@@ -12,6 +12,7 @@ const { createProject } = require('../src/commands/create');
 const { refactorProject } = require('../src/commands/refactor');
 const { analyzeProject } = require('../src/commands/analyze');
 const { deployProject } = require('../src/commands/deploy');
+const interactive = require('../src/commands/interactive');
 
 program
   .name('tryforge')
@@ -20,14 +21,24 @@ program
 
 // CREATE command
 program
-  .command('create <name>')
-  .description('Create a new application from scratch using Triple AI')
+  .command('create [name]')
+  .description('Create a new application (interactive mode if no name provided)')
   .option('-t, --type <type>', 'Application type (blog, ecommerce, social, saas)', 'webapp')
   .option('--template <template>', 'Use specific template')
+  .option('--guided', 'Use guided mode (step-by-step)')
+  .option('--no-interactive', 'Skip interactive mode')
   .option('--no-graphics', 'Skip AI-generated graphics')
   .option('--no-frontend', 'Backend only')
   .option('--no-backend', 'Frontend only')
-  .action(createProject);
+  .action(async (name, options) => {
+    if (!name || !options.noInteractive) {
+      // Use interactive conversational mode
+      await interactive(name, options);
+    } else {
+      // Use traditional mode
+      await createProject(name, options);
+    }
+  });
 
 // REFACTOR command
 program
