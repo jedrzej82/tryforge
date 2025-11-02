@@ -128,16 +128,60 @@ program
     await DbCommand.seed();
   });
 
+// PREVIEW Command
+program
+  .command('preview [path]')
+  .description('Start live preview with hot reload')
+  .action(async (path) => {
+    const PreviewCommand = require('./commands/preview');
+    await PreviewCommand.execute(path);
+  });
+
+// DEPLOY Command
+program
+  .command('deploy [platform]')
+  .description('Deploy to cloud (vercel|netlify|railway|render)')
+  .option('-p, --path <path>', 'Project path')
+  .action(async (platform, options) => {
+    const DeployCommand = require('./commands/deploy');
+    await DeployCommand.execute(platform, options);
+  });
+
+program
+  .command('deploy:status <platform>')
+  .description('Check deployment status')
+  .option('-p, --path <path>', 'Project path')
+  .action(async (platform, options) => {
+    const DeployCommand = require('./commands/deploy');
+    await DeployCommand.status(platform, options);
+  });
+
+// GENERATE Command
+program
+  .command('generate [type] [description]')
+  .description('AI-powered code generation (component|route|feature|test)')
+  .option('-p, --path <path>', 'Project path')
+  .option('-f, --file <file>', 'File path (for test generation)')
+  .action(async (type, description, options) => {
+    const GenerateCommand = require('./commands/generate');
+    await GenerateCommand.execute(type, description, options);
+  });
+
 // Interactive mode (no args)
 if (process.argv.length === 2) {
   console.log(chalk.cyan.bold('\n🔥 TryForge - Triple AI Application Framework\n'));
-  console.log(chalk.gray('From idea to app in minutes!\n'));
-  console.log(chalk.white('Usage examples:'));
-  console.log(chalk.gray('  $ tryforge create "Blog platform with comments"'));
-  console.log(chalk.gray('  $ tryforge refactor "improve UI and add dark mode"'));
-  console.log(chalk.gray('  $ tryforge analyze performance'));
-  console.log(chalk.gray('  $ tryforge status\n'));
-  console.log(chalk.white('For help:'));
+  console.log(chalk.gray('The most powerful AI-powered development tool!\n'));
+  console.log(chalk.white('✨ Features:'));
+  console.log(chalk.gray('  • Real Claude API integration for intelligent code generation'));
+  console.log(chalk.gray('  • Live preview with hot reload (like Replit)'));
+  console.log(chalk.gray('  • One-click deployment to Vercel/Netlify/Railway'));
+  console.log(chalk.gray('  • AI-powered auto-fix and code improvements\n'));
+  console.log(chalk.white('🚀 Quick Start:'));
+  console.log(chalk.gray('  $ tryforge create "Blog platform"     # Create app'));
+  console.log(chalk.gray('  $ tryforge preview                    # Live preview'));
+  console.log(chalk.gray('  $ tryforge generate component "..."   # AI code gen'));
+  console.log(chalk.gray('  $ tryforge deploy vercel              # Deploy\n'));
+  console.log(chalk.white('📚 More commands:'));
   console.log(chalk.gray('  $ tryforge --help\n'));
   process.exit(0);
 }

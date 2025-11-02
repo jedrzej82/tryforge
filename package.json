@@ -28,6 +28,7 @@
   "author": "TryForge Team",
   "license": "MIT",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.0",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
     "ora": "^5.4.1",
@@ -47,14 +48,18 @@
     "fs-extra": "^11.2.0",
     "glob": "^10.3.10",
     "handlebars": "^4.7.8",
-    "markdown-it": "^14.0.0"
+    "markdown-it": "^14.0.0",
+    "chokidar": "^3.5.3",
+    "js-beautify": "^1.14.11",
+    "execa": "^8.0.1"
   },
   "devDependencies": {
     "jest": "^29.7.0",
     "eslint": "^8.55.0",
     "prettier": "^3.1.1",
     "nodemon": "^3.0.2",
-    "@types/node": "^20.10.5"
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": ">=18.0.0",
