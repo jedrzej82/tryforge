@@ -1,9 +1,10 @@
 /**
  * Intelligent Code Generator
- * Uses Claude API for smart, context-aware code generation
+ * Supports multiple AI providers: Claude, OpenRouter
  */
 
 const ClaudeAPI = require('../ai-services/claude-api');
+const OpenRouterAPI = require('../ai-services/openrouter-api');
 const fs = require('fs-extra');
 const path = require('path');
 const chalk = require('chalk');
@@ -12,7 +13,21 @@ const { beautify } = require('js-beautify');
 
 class IntelligentGenerator {
   constructor() {
-    this.claude = new ClaudeAPI();
+    // Select AI provider based on environment variable
+    const aiProvider = process.env.AI_PROVIDER || 'claude';
+
+    if (aiProvider === 'openrouter') {
+      this.ai = new OpenRouterAPI();
+      this.providerName = 'OpenRouter';
+    } else {
+      this.ai = new ClaudeAPI();
+      this.providerName = 'Claude';
+    }
+
+    // Keep claude reference for backward compatibility
+    this.claude = this.ai;
+
+    console.log(chalk.cyan(`🤖 Using ${this.providerName} for AI generation`));
   }
 
   /**

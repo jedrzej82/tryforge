@@ -26,6 +26,15 @@ This will start the admin panel on `http://localhost:3333`
 tryforge admin --port 4444
 ```
 
+## AI Provider Selection
+
+**Choose your AI provider** at the top of the admin panel:
+
+- **Claude (Anthropic)** - Premium AI, best quality, pay-per-use or subscription
+- **OpenRouter** - Access to 7+ free models including MiniMax M2
+
+The intelligent generator will automatically use your selected provider for all code generation tasks.
+
 ## Configuration Sections
 
 ### 🤖 Claude Configuration
@@ -50,6 +59,39 @@ Configure Claude for intelligent code generation with two authentication modes:
 - **Organization ID**: Optional, for organization accounts
 
 **Test Button**: Validates your credentials before saving
+
+### 🌐 OpenRouter Configuration
+
+Access multiple free AI models through a single API:
+
+#### Why OpenRouter?
+- **7+ Free Models**: Including MiniMax M2, Google Gemini, Meta Llama
+- **Zero Cost**: Free models have no API costs
+- **Huge Context**: Up to 1M tokens (Gemini Flash)
+- **Easy Switching**: Change models without code changes
+- **Perfect for Dev**: Test with free models, scale as needed
+
+#### Free Models Available
+1. **MiniMax M2** (minimax/minimax-01) - 200K context - **Recommended**
+2. **Google Gemini Flash 1.5** - 1M context
+3. **Google Gemini Flash 1.5 8B** - 1M context
+4. **Meta Llama 3.2 3B** - 128K context
+5. **Meta Llama 3.1 8B** - 128K context
+6. **Microsoft Phi-3 Medium** - 128K context
+7. **Qwen 2 7B** - 32K context
+
+#### Setup
+1. Create free account at [openrouter.ai](https://openrouter.ai)
+2. Get API key from [OpenRouter Keys](https://openrouter.ai/keys)
+3. Paste in admin panel
+4. Select preferred model
+5. Test and save
+
+**Best For:**
+- Development and testing
+- Cost-conscious projects
+- Experimenting with different models
+- High-volume usage with free models
 
 ### 🚀 Deployment
 
@@ -196,17 +238,35 @@ tryforge admin --port 3334
 
 ## Example Usage
 
+### Using Claude (Premium)
+
 ```bash
 # Start admin panel
 tryforge admin
 
 # Open browser to http://localhost:3333
-# 1. Enter your Anthropic API key
-# 2. Click "Test" to validate
-# 3. Add deployment tokens (optional)
-# 4. Configure GitHub settings
+# 1. Select "Claude" as AI Provider
+# 2. Enter your Anthropic API key
+# 3. Click "Test" to validate
+# 4. Configure other settings
 # 5. Click "Save Configuration"
-# 6. Ready to use TryForge!
+# 6. Ready to use TryForge with Claude!
+```
+
+### Using OpenRouter (Free Models)
+
+```bash
+# Start admin panel
+tryforge admin
+
+# Open browser to http://localhost:3333
+# 1. Select "OpenRouter" as AI Provider
+# 2. Enter your OpenRouter API key (free from openrouter.ai)
+# 3. Choose a free model (MiniMax M2 recommended)
+# 4. Click "Test" to validate
+# 5. Configure other settings
+# 6. Click "Save Configuration"
+# 7. Ready to use TryForge with FREE AI models!
 ```
 
 ## Security Notes
