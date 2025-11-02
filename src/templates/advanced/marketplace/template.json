@@ -1,0 +1,343 @@
+{
+  "name": "marketplace",
+  "displayName": "E-commerce Marketplace (Allegro-like)",
+  "description": "Production-ready marketplace platform with multi-vendor support",
+  "version": "1.0.0",
+  "author": "TryForge",
+  "architecture": "microservices",
+  "features": {
+    "core": [
+      "multi-vendor",
+      "product-catalog",
+      "advanced-search",
+      "shopping-cart",
+      "multi-payment",
+      "order-management",
+      "real-time-notifications",
+      "analytics"
+    ],
+    "optional": [
+      "auction-system",
+      "messaging",
+      "reviews-ratings",
+      "recommendations",
+      "mobile-apps",
+      "admin-panel"
+    ]
+  },
+  "microservices": [
+    {
+      "name": "api-gateway",
+      "port": 3000,
+      "description": "API Gateway with rate limiting and authentication",
+      "dependencies": []
+    },
+    {
+      "name": "user-service",
+      "port": 3001,
+      "description": "User management, authentication, authorization",
+      "database": "postgresql",
+      "features": ["jwt", "oauth2", "rbac", "mfa"]
+    },
+    {
+      "name": "product-service",
+      "port": 3002,
+      "description": "Product catalog, categories, attributes",
+      "database": "postgresql",
+      "cache": "redis",
+      "search": "elasticsearch"
+    },
+    {
+      "name": "order-service",
+      "port": 3003,
+      "description": "Order processing, state management, fulfillment",
+      "database": "postgresql",
+      "queue": "bullmq",
+      "features": ["state-machine", "workflows"]
+    },
+    {
+      "name": "payment-service",
+      "port": 3004,
+      "description": "Payment processing, refunds, split payments",
+      "database": "postgresql",
+      "integrations": ["stripe", "paypal", "przelewy24"],
+      "features": ["webhooks", "split-payments", "refunds"]
+    },
+    {
+      "name": "search-service",
+      "port": 3005,
+      "description": "Full-text search, filters, autocomplete",
+      "database": "elasticsearch",
+      "cache": "redis",
+      "features": ["faceted-search", "autocomplete", "typo-tolerance"]
+    },
+    {
+      "name": "media-service",
+      "port": 3006,
+      "description": "Image/video upload, processing, CDN",
+      "storage": "s3",
+      "cdn": "cloudflare",
+      "features": ["image-optimization", "multiple-sizes", "watermark"]
+    },
+    {
+      "name": "notification-service",
+      "port": 3007,
+      "description": "Email, SMS, push, real-time notifications",
+      "queue": "bullmq",
+      "websocket": true,
+      "integrations": ["sendgrid", "twilio", "firebase"]
+    },
+    {
+      "name": "analytics-service",
+      "port": 3008,
+      "description": "Event tracking, reporting, dashboards",
+      "database": "mongodb",
+      "features": ["event-tracking", "reports", "dashboards"]
+    },
+    {
+      "name": "review-service",
+      "port": 3009,
+      "description": "Reviews, ratings, moderation",
+      "database": "mongodb",
+      "features": ["ratings", "moderation", "spam-detection"]
+    }
+  ],
+  "databases": {
+    "postgresql": {
+      "version": "15",
+      "features": ["replication", "partitioning", "full-text-search"]
+    },
+    "mongodb": {
+      "version": "7",
+      "features": ["replica-set", "sharding"]
+    },
+    "redis": {
+      "version": "7",
+      "features": ["cluster", "persistence"]
+    },
+    "elasticsearch": {
+      "version": "8",
+      "features": ["cluster", "ml"]
+    }
+  },
+  "frontend": {
+    "type": "react",
+    "framework": "next.js",
+    "styling": "tailwindcss",
+    "state": "zustand",
+    "features": [
+      "ssr",
+      "code-splitting",
+      "lazy-loading",
+      "pwa",
+      "seo"
+    ],
+    "apps": [
+      {
+        "name": "marketplace-web",
+        "description": "Main marketplace website",
+        "port": 5173,
+        "routes": [
+          "/",
+          "/products",
+          "/product/:id",
+          "/cart",
+          "/checkout",
+          "/orders",
+          "/seller/dashboard",
+          "/admin"
+        ]
+      },
+      {
+        "name": "seller-panel",
+        "description": "Seller management panel",
+        "port": 5174,
+        "routes": [
+          "/dashboard",
+          "/products",
+          "/orders",
+          "/analytics",
+          "/settings"
+        ]
+      },
+      {
+        "name": "admin-panel",
+        "description": "Admin management panel",
+        "port": 5175,
+        "routes": [
+          "/dashboard",
+          "/users",
+          "/products",
+          "/orders",
+          "/analytics",
+          "/settings"
+        ]
+      }
+    ]
+  },
+  "devops": {
+    "containerization": "docker",
+    "orchestration": "kubernetes",
+    "ci-cd": "github-actions",
+    "monitoring": "prometheus+grafana",
+    "logging": "elk-stack",
+    "error-tracking": "sentry"
+  },
+  "security": {
+    "authentication": ["jwt", "oauth2"],
+    "authorization": "rbac",
+    "rate-limiting": true,
+    "csrf-protection": true,
+    "xss-protection": true,
+    "sql-injection-prevention": true,
+    "encryption-at-rest": true,
+    "audit-logging": true
+  },
+  "testing": {
+    "unit": "jest",
+    "integration": "supertest",
+    "e2e": "cypress",
+    "load": "k6"
+  },
+  "deployment": {
+    "targets": ["aws", "gcp", "azure", "digitalocean"],
+    "strategies": ["blue-green", "canary", "rolling"]
+  },
+  "documentation": {
+    "api": "swagger/openapi",
+    "architecture": "c4-diagrams",
+    "user": "markdown"
+  },
+  "roles": [
+    {
+      "name": "admin",
+      "permissions": ["*"]
+    },
+    {
+      "name": "seller",
+      "permissions": [
+        "products.create",
+        "products.update:own",
+        "products.delete:own",
+        "orders.read:own",
+        "orders.update:own",
+        "analytics.read:own"
+      ]
+    },
+    {
+      "name": "buyer",
+      "permissions": [
+        "products.read",
+        "cart.manage",
+        "orders.create",
+        "orders.read:own",
+        "reviews.create"
+      ]
+    },
+    {
+      "name": "moderator",
+      "permissions": [
+        "products.read",
+        "products.moderate",
+        "reviews.moderate",
+        "users.read"
+      ]
+    }
+  ],
+  "businessLogic": {
+    "workflows": [
+      {
+        "name": "OrderFulfillment",
+        "steps": [
+          "payment-verification",
+          "inventory-check",
+          "seller-notification",
+          "shipping-label-generation",
+          "customer-notification"
+        ]
+      },
+      {
+        "name": "ProductApproval",
+        "steps": [
+          "submission",
+          "auto-validation",
+          "manual-review",
+          "approval",
+          "publication"
+        ]
+      }
+    ],
+    "stateMachines": [
+      {
+        "name": "OrderState",
+        "states": ["pending", "paid", "processing", "shipped", "delivered", "cancelled", "refunded"],
+        "transitions": [
+          { "from": "pending", "to": "paid", "event": "payment_confirmed" },
+          { "from": "paid", "to": "processing", "event": "order_confirmed" },
+          { "from": "processing", "to": "shipped", "event": "shipped" },
+          { "from": "shipped", "to": "delivered", "event": "delivered" },
+          { "from": "*", "to": "cancelled", "event": "cancelled" },
+          { "from": "delivered", "to": "refunded", "event": "refund_approved" }
+        ]
+      }
+    ]
+  },
+  "integrations": {
+    "payments": {
+      "stripe": { "enabled": true, "features": ["cards", "wallets", "subscriptions"] },
+      "paypal": { "enabled": true, "features": ["checkout", "subscriptions"] },
+      "przelewy24": { "enabled": true, "features": ["cards", "blik", "transfer"] }
+    },
+    "shipping": {
+      "dhl": { "enabled": true, "features": ["rates", "labels", "tracking"] },
+      "ups": { "enabled": true, "features": ["rates", "labels", "tracking"] },
+      "inpost": { "enabled": true, "features": ["paczkomaty", "courier"] }
+    },
+    "email": {
+      "sendgrid": { "enabled": true, "features": ["transactional", "marketing"] }
+    },
+    "sms": {
+      "twilio": { "enabled": true, "features": ["sms", "verification"] }
+    },
+    "storage": {
+      "aws-s3": { "enabled": true, "features": ["upload", "cdn"] }
+    },
+    "analytics": {
+      "google-analytics": { "enabled": true },
+      "mixpanel": { "enabled": true }
+    }
+  },
+  "performance": {
+    "caching": {
+      "strategy": "multi-layer",
+      "layers": ["redis", "cdn", "browser"],
+      "ttl": {
+        "products": 3600,
+        "categories": 86400,
+        "user-session": 1800
+      }
+    },
+    "optimization": {
+      "images": ["webp", "responsive", "lazy-loading"],
+      "code": ["splitting", "tree-shaking", "minification"],
+      "database": ["indexing", "query-optimization", "connection-pooling"]
+    }
+  },
+  "scalability": {
+    "horizontal": true,
+    "load-balancing": "nginx",
+    "auto-scaling": {
+      "enabled": true,
+      "metrics": ["cpu", "memory", "requests-per-second"],
+      "min-instances": 2,
+      "max-instances": 20
+    }
+  },
+  "estimatedComplexity": "high",
+  "estimatedDevTime": "3-6 months",
+  "teamSize": "5-8 developers",
+  "infrastructure": {
+    "estimated-monthly-cost": "$500-2000",
+    "scaling-potential": "millions of users"
+  }
+}
