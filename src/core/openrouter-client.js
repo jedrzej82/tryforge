@@ -14,7 +14,9 @@ const axios = require('axios');
 class OpenRouterClient {
   constructor(config = {}) {
     this.apiKey = config.apiKey || process.env.OPENROUTER_API_KEY;
+    this.claudeCodeMaxToken = config.claudeCodeMaxToken || process.env.CLAUDE_CODE_MAX_TOKEN;
     this.baseURL = 'https://openrouter.ai/api/v1';
+    this.claudeBaseURL = 'https://api.anthropic.com/v1';
     this.preferFree = config.preferFree !== false;  // Default true
     this.maxCostPerRequest = config.maxCostPerRequest || 0.05;
     
@@ -117,7 +119,56 @@ class OpenRouterClient {
   }
 
   /**
-   * Generate completion using OpenRouter
+   * Generate completion using direct Claude API (for Claude Code Max token)
+   */
+  async generateWithClaude(options) {
+    const {
+      prompt,
+      system = 'You are a helpful AI assistant specialized in code generation.',
+      temperature = 0.7,
+      maxTokens = 4096
+    } = options;
+
+    if (!this.claudeCodeMaxToken) {
+      throw new Error('CLAUDE_CODE_MAX_TOKEN not configured');
+    }
+
+    try {
+      const response = await axios.post(
+        `${this.claudeBaseURL}/messages`,
+        {
+          model: 'claude-3-opus-20240229',
+          max_tokens: maxTokens,
+          system,
+          messages: [
+            { role: 'user', content: prompt }
+          ],
+          temperature
+        },
+        {
+          headers: {
+            'x-api-key': this.claudeCodeMaxToken,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json'
+          }
+        }
+      );
+
+      return {
+        content: response.data.content[0].text,
+        model: 'claude-code-max-direct',
+        usage: response.data.usage,
+        cost: (response.data.usage.input_tokens / 1000 * 0.015) + 
+              (response.data.usage.output_tokens / 1000 * 0.075)
+      };
+    } catch (error) {
+      console.error('Claude API error:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate completion using OpenRouter or direct Claude API
    */
   async generate(options) {
     const {
@@ -126,13 +177,29 @@ class OpenRouterClient {
       model,
       temperature = 0.7,
       maxTokens,
-      stream = false
+      stream = false,
+      useDirectClaude = false  // New option
     } = options;
+
+    // If Claude Code Max token is available and user wants to use it directly
+    if (useDirectClaude && this.claudeCodeMaxToken && 
+        (model === 'claude-code-max' || !model)) {
+      return this.generateWithClaude({ prompt, system, temperature, maxTokens });
+    }
 
     // Select model if not specified
     const selectedModel = model 
       ? (this.models[model] || this.models['minimax-m2'])
       : this.selectModel(options);
+
+    // If Claude Code Max is selected but no OpenRouter key, try direct API
+    if (selectedModel.id.includes('claude') && !this.apiKey && this.claudeCodeMaxToken) {
+      return this.generateWithClaude({ prompt, system, temperature, maxTokens });
+    }
+
+    if (!this.apiKey) {
+      throw new Error('OPENROUTER_API_KEY not configured and no fallback available');
+    }
 
     try {
       const response = await axios.post(

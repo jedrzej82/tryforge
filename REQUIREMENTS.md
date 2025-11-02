@@ -86,10 +86,30 @@ PORT=3000
 LOG_LEVEL=info
 
 # ===================================
-# AI SERVICES (Optional but recommended)
+# AI SERVICES - FREE & PREMIUM OPTIONS
 # ===================================
 
-# Claude API (Anthropic)
+# OpenRouter (RECOMMENDED - Free AI Models!)
+# Get from: https://openrouter.ai/
+# Provides access to multiple LLMs including FREE models:
+# - Minimax M2 (FREE, 245K context, excellent for code)
+# - Mixtral 8x7B (FREE, 32K context, very fast)
+# - Llama 3 70B (FREE, 8K context)
+OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxx
+
+# AI Model Preferences
+AI_MODEL_PREFERENCE=free  # free, balanced, premium
+AI_MAX_COST_PER_REQUEST=0.05
+AI_ENABLE_CACHE=true
+
+# Claude Code Max Token (OPTIONAL - For Direct Anthropic API Access)
+# Get from: https://console.anthropic.com/
+# Use this if you have a dedicated Claude API key for code generation
+# Note: You can use Claude through OpenRouter (above) OR directly via this token
+# Direct API may have better performance and higher rate limits for Claude models
+CLAUDE_CODE_MAX_TOKEN=sk-ant-xxxxxxxxxxxxx
+
+# Claude API (Alternative to OpenRouter)
 CLAUDE_API_KEY=sk-ant-xxxxxxxxxxxxx
 # Get from: https://console.anthropic.com/
 
@@ -325,13 +345,45 @@ NODE_ENV=production npm start
 
 ### Zalecane (AI Features)
 
-2. **Claude API** (Anthropic)
-   - URL: https://console.anthropic.com/
-   - Koszt: $0.008 per 1K tokens (input), $0.024 per 1K tokens (output)
-   - Limit free: Brak, od razu płatne
-   - Użycie w TryForge: AI code generation, analysis
+2. **OpenRouter API** (FREE AI Models!) **← ZALECANE**
+   - URL: https://openrouter.ai/
+   - Koszt: **$0.00** dla modeli Minimax M2, Mixtral, Llama 3
+   - Rejestracja: Wymagana (darmowa)
+   - Limit free: Minimax M2, Mixtral, Llama 3 - unlimited usage
+   - Krok po kroku:
+     1. Wejdź na https://openrouter.ai/
+     2. Kliknij "Sign up" i zarejestruj się (GitHub OAuth)
+     3. Wejdź w "Settings" → "API Keys"
+     4. Kliknij "Create new key"
+     5. Skopiuj klucz (format: `sk-or-v1-...`)
+     6. Dodaj do `.env`: `OPENROUTER_API_KEY=sk-or-v1-your-key`
+   - Użycie w TryForge: **Primary AI** dla code generation (FREE models!)
 
-3. **GitHub Token**
+3. **Claude Code Max Token** (OPTIONAL - Direct Anthropic API)
+   - URL: https://console.anthropic.com/
+   - Koszt: $0.015 per 1K tokens (input), $0.075 per 1K tokens (output)
+   - Limit free: Brak, od razu płatne
+   - Kiedy używać:
+     - Masz dedykowany Claude API key
+     - Chcesz najwyższej jakości code generation
+     - Potrzebujesz wyższych rate limits niż OpenRouter
+   - Krok po kroku:
+     1. Wejdź na https://console.anthropic.com/
+     2. Zarejestruj się i zweryfikuj email
+     3. Wejdź w "API Keys" → "Create Key"
+     4. Skopiuj klucz (format: `sk-ant-...`)
+     5. Dodaj do `.env`: `CLAUDE_CODE_MAX_TOKEN=sk-ant-your-key`
+   - Użycie w TryForge: Premium code generation (fallback gdy OpenRouter niedostępny)
+   - **Uwaga:** System automatycznie użyje tego tokenu gdy:
+     - Chcesz użyć Claude bezpośrednio (opcja `useDirectClaude: true`)
+     - OpenRouter jest niedostępny i potrzebujesz Claude
+
+4. **Claude API** (Alternative)
+   - URL: https://console.anthropic.com/
+   - Koszt: $0.003 per 1K tokens (input), $0.015 per 1K tokens (output)
+   - Użycie w TryForge: AI code generation (alternatywa dla OpenRouter)
+
+5. **GitHub Token**
    - URL: https://github.com/settings/tokens
    - Koszt: Darmowe
    - Permissions needed: repo, workflow
