@@ -18,9 +18,22 @@ class ClaudeAPI {
    * Initialize Anthropic client
    */
   initializeClient() {
+    const authMode = process.env.CLAUDE_AUTH_MODE || 'api';
+
+    if (authMode === 'subscription') {
+      this.initializeSubscriptionMode();
+    } else {
+      this.initializeApiMode();
+    }
+  }
+
+  /**
+   * Initialize API key mode
+   */
+  initializeApiMode() {
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
-    if (!apiKey) {
+    if (!apiKey || apiKey.includes('your-key-here')) {
       console.warn(chalk.yellow('⚠️  ANTHROPIC_API_KEY not set. Using mock mode.'));
       this.mockMode = true;
       return;
@@ -29,6 +42,36 @@ class ClaudeAPI {
     this.client = new Anthropic({
       apiKey: apiKey,
     });
+    this.authMode = 'api';
+    this.mockMode = false;
+  }
+
+  /**
+   * Initialize subscription token mode (Claude Pro/Max)
+   */
+  initializeSubscriptionMode() {
+    const sessionToken = process.env.CLAUDE_SESSION_TOKEN;
+    const organizationId = process.env.CLAUDE_ORGANIZATION_ID;
+
+    if (!sessionToken || sessionToken.includes('your-session-token-here')) {
+      console.warn(chalk.yellow('⚠️  CLAUDE_SESSION_TOKEN not set. Using mock mode.'));
+      this.mockMode = true;
+      return;
+    }
+
+    // For subscription mode, we'll use the Anthropic SDK but with custom headers
+    // The SDK supports this via defaultHeaders option
+    this.client = new Anthropic({
+      apiKey: sessionToken, // Session token can be used as API key in some cases
+      defaultHeaders: {
+        'anthropic-version': '2023-06-01',
+        'cookie': `sessionKey=${sessionToken}`,
+        ...(organizationId && { 'anthropic-organization': organizationId }),
+      },
+    });
+    this.authMode = 'subscription';
+    this.sessionToken = sessionToken;
+    this.organizationId = organizationId;
     this.mockMode = false;
   }
 

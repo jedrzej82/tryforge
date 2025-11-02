@@ -116,7 +116,10 @@ class ConfigManager {
   formatConfigForDisplay(config) {
     const formatted = {
       claude: {
+        authMode: config.CLAUDE_AUTH_MODE || 'api',
         apiKey: this.maskValue(config.ANTHROPIC_API_KEY),
+        sessionToken: this.maskValue(config.CLAUDE_SESSION_TOKEN),
+        organizationId: config.CLAUDE_ORGANIZATION_ID || '',
       },
       github: {
         username: config.GITHUB_USERNAME || '',
@@ -187,12 +190,25 @@ class ConfigManager {
     const encryptedStore = {};
 
     // Update values
+    if (updates.claude?.authMode) {
+      currentEnv.CLAUDE_AUTH_MODE = updates.claude.authMode;
+    }
     if (updates.claude?.apiKey) {
       currentEnv.ANTHROPIC_API_KEY = updates.claude.apiKey;
       encryptedStore.ANTHROPIC_API_KEY = {
         encrypted: true,
         value: this.encrypt(updates.claude.apiKey),
       };
+    }
+    if (updates.claude?.sessionToken) {
+      currentEnv.CLAUDE_SESSION_TOKEN = updates.claude.sessionToken;
+      encryptedStore.CLAUDE_SESSION_TOKEN = {
+        encrypted: true,
+        value: this.encrypt(updates.claude.sessionToken),
+      };
+    }
+    if (updates.claude?.organizationId) {
+      currentEnv.CLAUDE_ORGANIZATION_ID = updates.claude.organizationId;
     }
 
     if (updates.github?.username) {
@@ -287,8 +303,14 @@ class ConfigManager {
     content += `# Last updated: ${new Date().toISOString()}\n\n`;
 
     // Claude API
-    content += '# Claude API (REQUIRED for AI code generation)\n';
+    content += '# Claude Configuration (REQUIRED for AI code generation)\n';
+    content += '# Auth Mode: "api" for API Key or "subscription" for Claude Pro/Max tokens\n';
+    content += `CLAUDE_AUTH_MODE=${config.CLAUDE_AUTH_MODE || 'api'}\n\n`;
+    content += '# API Key (for api mode)\n';
     content += `ANTHROPIC_API_KEY=${config.ANTHROPIC_API_KEY || 'sk-ant-api03-your-key-here'}\n\n`;
+    content += '# Subscription Token (for subscription mode - Claude Pro/Max)\n';
+    content += `CLAUDE_SESSION_TOKEN=${config.CLAUDE_SESSION_TOKEN || 'sessKey-ant-your-session-token-here'}\n`;
+    content += `CLAUDE_ORGANIZATION_ID=${config.CLAUDE_ORGANIZATION_ID || ''}\n\n`;
 
     // GitHub
     content += '# GitHub Configuration\n';
@@ -344,7 +366,7 @@ class ConfigManager {
    */
   getDefaultConfig() {
     return {
-      claude: { apiKey: '' },
+      claude: { authMode: 'api', apiKey: '', sessionToken: '', organizationId: '' },
       github: { username: '', email: '' },
       deployment: { vercel: '', netlify: '', railway: '', render: '' },
       database: { url: '', user: '' },
@@ -361,6 +383,8 @@ class ConfigManager {
     switch (service) {
       case 'claude':
         return await this.testClaudeKey(key);
+      case 'claude-subscription':
+        return await this.testClaudeSubscriptionToken(key);
       case 'vercel':
         return await this.testVercelKey(key);
       case 'netlify':
@@ -399,6 +423,44 @@ class ConfigManager {
         valid: false,
         message: 'Invalid Claude API key',
         error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Test Claude subscription token (Claude Pro/Max)
+   */
+  async testClaudeSubscriptionToken(sessionToken) {
+    try {
+      const Anthropic = require('@anthropic-ai/sdk');
+
+      // Try to use session token with custom headers
+      const client = new Anthropic({
+        apiKey: sessionToken,
+        defaultHeaders: {
+          'anthropic-version': '2023-06-01',
+          'cookie': `sessionKey=${sessionToken}`,
+        },
+      });
+
+      // Try a minimal API call
+      const response = await client.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 10,
+        messages: [{ role: 'user', content: 'Hi' }],
+      });
+
+      return {
+        valid: true,
+        message: 'Claude subscription token is valid',
+        details: `Using Claude Pro/Max subscription`,
+      };
+    } catch (error) {
+      // If that fails, it might be an authentication issue
+      return {
+        valid: false,
+        message: 'Invalid Claude subscription token',
+        error: 'Please check your session token from claude.ai cookies',
       };
     }
   }

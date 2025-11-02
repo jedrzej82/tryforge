@@ -379,24 +379,84 @@
     <div id="tab-claude" class="tab-content active">
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title">🤖 Claude API Configuration</h2>
+          <h2 class="card-title">🤖 Claude Configuration</h2>
         </div>
+
+        <!-- Authentication Mode Selection -->
         <div class="form-group">
-          <label>API Key</label>
-          <div class="input-with-test">
-            <input
-              type="password"
-              id="claude-api-key"
-              placeholder="sk-ant-api03-..."
-            >
-            <button class="btn btn-secondary btn-test" onclick="testKey('claude')">
-              Test
-            </button>
-          </div>
+          <label>Authentication Mode</label>
+          <select id="claude-auth-mode" onchange="toggleClaudeAuthMode()">
+            <option value="api">API Key (Pay-per-use)</option>
+            <option value="subscription">Subscription Token (Claude Pro/Max)</option>
+          </select>
           <div class="help-text">
-            Get your API key from <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a>
+            Choose "API Key" for pay-per-use via Anthropic API, or "Subscription" if you have Claude Pro/Max
           </div>
-          <div id="claude-test-result"></div>
+        </div>
+
+        <!-- API Key Mode -->
+        <div id="api-mode-section">
+          <div class="form-group">
+            <label>API Key</label>
+            <div class="input-with-test">
+              <input
+                type="password"
+                id="claude-api-key"
+                placeholder="sk-ant-api03-..."
+              >
+              <button class="btn btn-secondary btn-test" onclick="testKey('claude')">
+                Test
+              </button>
+            </div>
+            <div class="help-text">
+              Get your API key from <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a>
+            </div>
+            <div id="claude-test-result"></div>
+          </div>
+        </div>
+
+        <!-- Subscription Mode -->
+        <div id="subscription-mode-section" style="display: none;">
+          <div class="form-group">
+            <label>Session Token</label>
+            <div class="input-with-test">
+              <input
+                type="password"
+                id="claude-session-token"
+                placeholder="sessKey-ant-..."
+              >
+              <button class="btn btn-secondary btn-test" onclick="testKey('claude-subscription')">
+                Test
+              </button>
+            </div>
+            <div class="help-text">
+              Get session token from Claude.ai browser cookies (sessionKey)
+            </div>
+            <div id="claude-subscription-test-result"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Organization ID (Optional)</label>
+            <input
+              type="text"
+              id="claude-organization-id"
+              placeholder="org-..."
+            >
+            <div class="help-text">
+              Leave empty if not using organization account
+            </div>
+          </div>
+
+          <div class="alert alert-warning">
+            <span class="icon">ℹ️</span>
+            <div>
+              <strong>How to get your Session Token:</strong><br>
+              1. Login to <a href="https://claude.ai" target="_blank">claude.ai</a><br>
+              2. Open browser DevTools (F12)<br>
+              3. Go to Application → Cookies<br>
+              4. Copy the value of "sessionKey" cookie
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -641,6 +701,21 @@
       });
     });
 
+    // Toggle Claude authentication mode
+    function toggleClaudeAuthMode() {
+      const authMode = document.getElementById('claude-auth-mode').value;
+      const apiSection = document.getElementById('api-mode-section');
+      const subscriptionSection = document.getElementById('subscription-mode-section');
+
+      if (authMode === 'subscription') {
+        apiSection.style.display = 'none';
+        subscriptionSection.style.display = 'block';
+      } else {
+        apiSection.style.display = 'block';
+        subscriptionSection.style.display = 'none';
+      }
+    }
+
     // Load configuration
     async function loadConfig() {
       try {
@@ -661,9 +736,17 @@
     // Populate form with config data
     function populateForm(config) {
       // Claude
+      document.getElementById('claude-auth-mode').value = config.claude?.authMode || 'api';
       if (config.claude?.apiKey) {
         document.getElementById('claude-api-key').placeholder = config.claude.apiKey;
       }
+      if (config.claude?.sessionToken) {
+        document.getElementById('claude-session-token').placeholder = config.claude.sessionToken;
+      }
+      document.getElementById('claude-organization-id').value = config.claude?.organizationId || '';
+
+      // Toggle mode display
+      toggleClaudeAuthMode();
 
       // Deployment
       if (config.deployment?.vercel) {
@@ -701,7 +784,10 @@
     async function saveConfig() {
       const updates = {
         claude: {
-          apiKey: document.getElementById('claude-api-key').value || undefined
+          authMode: document.getElementById('claude-auth-mode').value,
+          apiKey: document.getElementById('claude-api-key').value || undefined,
+          sessionToken: document.getElementById('claude-session-token').value || undefined,
+          organizationId: document.getElementById('claude-organization-id').value || undefined
         },
         github: {
           username: document.getElementById('github-username').value,
@@ -765,6 +851,7 @@
     async function testKey(service) {
       const keyMap = {
         'claude': 'claude-api-key',
+        'claude-subscription': 'claude-session-token',
         'vercel': 'vercel-token',
         'netlify': 'netlify-token',
         'railway': 'railway-token',

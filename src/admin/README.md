@@ -28,11 +28,28 @@ tryforge admin --port 4444
 
 ## Configuration Sections
 
-### 🤖 Claude API
+### 🤖 Claude Configuration
 
-Configure Anthropic Claude API for intelligent code generation:
+Configure Claude for intelligent code generation with two authentication modes:
+
+#### API Key Mode (Pay-per-use)
 - **API Key**: Get from [Anthropic Console](https://console.anthropic.com/)
-- **Test Button**: Validates your API key
+- Best for: Production use, predictable billing
+- Costs: Pay per token used
+- Setup: Create API key in Anthropic Console
+
+#### Subscription Mode (Claude Pro/Max)
+- **Session Token**: Extract from claude.ai browser cookies
+- Best for: Users with existing Claude Pro/Max subscription
+- Costs: Use your existing subscription tokens
+- Setup:
+  1. Login to [claude.ai](https://claude.ai)
+  2. Open DevTools (F12) → Application → Cookies
+  3. Copy the `sessionKey` cookie value
+  4. Paste in admin panel
+- **Organization ID**: Optional, for organization accounts
+
+**Test Button**: Validates your credentials before saving
 
 ### 🚀 Deployment
 
@@ -78,6 +95,34 @@ All sensitive API keys are encrypted using AES-256-CBC encryption:
 2. **Rotate keys** regularly
 3. **Use test button** to validate keys before saving
 4. **Limit access** to admin panel (localhost only by default)
+
+## Claude Authentication Modes
+
+### When to use API Key Mode
+
+✅ **Best for:**
+- Production applications
+- Automated systems
+- High-volume usage
+- Team collaboration
+
+💰 **Billing:** Pay-per-use (token-based)
+
+🔑 **Get key:** [Anthropic Console](https://console.anthropic.com/)
+
+### When to use Subscription Mode
+
+✅ **Best for:**
+- Personal projects
+- Development/testing
+- Users with Claude Pro/Max subscription
+- Cost-effective for moderate usage
+
+💰 **Billing:** Included in Claude Pro/Max subscription
+
+🔑 **Get token:** Extract from claude.ai browser cookies
+
+**Note:** Subscription tokens may expire when you log out or after a period of time. API keys are more stable for production use.
 
 ## Files Modified
 
@@ -129,6 +174,19 @@ tryforge admin --port 3334
 - Check internet connection
 - Verify key is correct
 - Check API service status
+
+### Subscription token test fails
+
+- Token may have expired (re-extract from cookies)
+- Ensure you're logged in to claude.ai
+- Check if subscription is active
+- Try logging out and back in to claude.ai
+
+### Token expires frequently
+
+- Use API Key mode for production instead
+- Subscription tokens are session-based
+- Consider upgrading to API key for stability
 
 ### Configuration not saving
 
