@@ -76,6 +76,26 @@ program
     require('../src/commands/config')(options);
   });
 
+// EDITOR command
+program
+  .command('editor [path]')
+  .description('Launch Visual Editor for project')
+  .option('-p, --port <port>', 'Server port', '5555')
+  .action((path, options) => {
+    const { editorCommand } = require('../src/commands/editor');
+    editorCommand(path, options);
+  });
+
+// WORKFLOW command
+program
+  .command('workflow')
+  .description('Launch Workflow Builder (automation studio)')
+  .option('-p, --port <port>', 'Server port', '5556')
+  .action((options) => {
+    const { workflowCommand } = require('../src/commands/workflow');
+    workflowCommand(options);
+  });
+
 program.parse(process.argv);
 
 // Show help if no command provided
