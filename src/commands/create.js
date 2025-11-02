@@ -6,47 +6,80 @@ const chalk = require('chalk');
 const ora = require('ora');
 const inquirer = require('inquirer');
 const TryForge = require('../index');
+const AdvancedTemplates = require('../core/advanced-templates');
 
 async function createProject(name, options) {
   console.log(chalk.bold.blue('\n🔥 TryForge CREATE Mode\n'));
   
+  const advancedTemplates = new AdvancedTemplates();
+  
   // Prompt for additional details if needed
-  if (!options.type) {
+  if (!options.type && !options.template) {
     const answers = await inquirer.prompt([
       {
         type: 'list',
-        name: 'type',
-        message: 'What type of application do you want to create?',
+        name: 'projectLevel',
+        message: 'Choose project complexity level:',
         choices: [
-          { name: '📝 Blog Platform', value: 'blog' },
-          { name: '🛒 E-commerce Store', value: 'ecommerce' },
-          { name: '👥 Social Media App', value: 'social' },
-          { name: '💼 SaaS Application', value: 'saas' },
-          { name: '📊 Dashboard/Admin Panel', value: 'dashboard' },
-          { name: '🌐 General Web App', value: 'webapp' }
+          { name: '🚀 Enterprise Level (SEO Platform, Marketplace, Classifieds)', value: 'enterprise' },
+          { name: '💼 Standard Application', value: 'standard' }
         ]
-      },
-      {
-        type: 'confirm',
-        name: 'graphics',
-        message: 'Generate AI graphics (logo, hero images)?',
-        default: true
-      },
-      {
-        type: 'confirm',
-        name: 'backend',
-        message: 'Include backend API?',
-        default: true
-      },
-      {
-        type: 'confirm',
-        name: 'frontend',
-        message: 'Include frontend UI?',
-        default: true
       }
     ]);
     
-    Object.assign(options, answers);
+    if (answers.projectLevel === 'enterprise') {
+      const templates = advancedTemplates.listTemplates();
+      const templateAnswer = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'template',
+          message: 'Choose template:',
+          choices: [
+            { name: '🔍 SEO Platform (Enterprise-grade)', value: 'seo-platform' },
+            { name: '🛒 Marketplace (Multi-vendor)', value: 'marketplace' },
+            { name: '📢 Classifieds (Location-based)', value: 'classifieds' },
+            { name: '📊 Analytics Platform', value: 'analytics-platform' },
+            { name: '🔧 SEO Tool', value: 'seo-tool' }
+          ]
+        }
+      ]);
+      options.template = templateAnswer.template;
+    } else {
+      const standardAnswers = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'type',
+          message: 'What type of application?',
+          choices: [
+            { name: '📝 Blog Platform', value: 'blog' },
+            { name: '🛒 E-commerce Store', value: 'ecommerce' },
+            { name: '👥 Social Media App', value: 'social' },
+            { name: '💼 SaaS Application', value: 'saas' },
+            { name: '📊 Dashboard/Admin Panel', value: 'dashboard' },
+            { name: '🌐 General Web App', value: 'webapp' }
+          ]
+        },
+        {
+          type: 'confirm',
+          name: 'graphics',
+          message: 'Generate AI graphics?',
+          default: true
+        },
+        {
+          type: 'confirm',
+          name: 'backend',
+          message: 'Include backend API?',
+          default: true
+        },
+        {
+          type: 'confirm',
+          name: 'frontend',
+          message: 'Include frontend UI?',
+          default: true
+        }
+      ]);
+      Object.assign(options, standardAnswers);
+    }
   }
   
   const spinner = ora('Starting Triple AI orchestration...').start();
