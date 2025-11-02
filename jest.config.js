@@ -5,6 +5,7 @@ module.exports = {
     'src/**/*.js',
     '!src/**/*.test.js',
     '!src/**/*.spec.js',
+    // CLI command files are implementations, not tests, but were incorrectly picked up by Jest
     '!src/cli/commands/*.js'
   ],
   testMatch: [
@@ -14,6 +15,7 @@ module.exports = {
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
+    // Exclude CLI commands from being picked up as test files
     '/src/cli/commands/'
   ],
   moduleFileExtensions: ['js', 'json'],
