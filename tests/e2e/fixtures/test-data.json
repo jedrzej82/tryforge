@@ -1,0 +1,105 @@
+{
+  "testUsers": [
+    {
+      "email": "test@example.com",
+      "password": "password123",
+      "name": "Test User",
+      "role": "user"
+    },
+    {
+      "email": "admin@example.com",
+      "password": "admin123",
+      "name": "Admin User",
+      "role": "admin"
+    }
+  ],
+  "apiKeys": {
+    "claude": "test-claude-key-123",
+    "openrouter": "test-openrouter-key-456",
+    "pollinations": "test-pollinations-key-789"
+  },
+  "testConfig": {
+    "baseURL": "http://localhost:3000",
+    "adminURL": "http://localhost:3333",
+    "timeout": 30000
+  },
+  "samplePosts": [
+    {
+      "id": 1,
+      "title": "First Test Post",
+      "content": "This is a test post for E2E testing",
+      "author": "Test User",
+      "published": true
+    },
+    {
+      "id": 2,
+      "title": "Second Test Post",
+      "content": "Another test post",
+      "author": "Test User",
+      "published": false
+    }
+  ],
+  "sampleProducts": [
+    {
+      "id": 1,
+      "name": "Test Product",
+      "price": 29.99,
+      "description": "A test product",
+      "inStock": true
+    },
+    {
+      "id": 2,
+      "name": "Another Product",
+      "price": 49.99,
+      "description": "Another test product",
+      "inStock": false
+    }
+  ],
+  "formData": {
+    "contact": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "subject": "Test Subject",
+      "message": "This is a test message for the contact form."
+    },
+    "registration": {
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "email": "jane@example.com",
+      "password": "SecurePass123!",
+      "confirmPassword": "SecurePass123!"
+    },
+    "login": {
+      "email": "test@example.com",
+      "password": "password123"
+    }
+  },
+  "invalidData": {
+    "emails": [
+      "invalid",
+      "@example.com",
+      "user@",
+      "user @example.com",
+      ""
+    ],
+    "passwords": [
+      "123",
+      "short",
+      "",
+      "no-uppercase-1",
+      "NO-LOWERCASE-1"
+    ],
+    "xssPayloads": [
+      "<script>alert('XSS')</script>",
+      "<img src=x onerror=alert('XSS')>",
+      "javascript:alert('XSS')",
+      "<svg onload=alert('XSS')>"
+    ],
+    "sqlInjection": [
+      "'; DROP TABLE users; --",
+      "1' OR '1'='1",
+      "admin'--",
+      "1' UNION SELECT * FROM users--"
+    ]
+  }
+}

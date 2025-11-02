@@ -59,3 +59,14 @@ backup/
 .classpath
 .project
 .settings/
+
+# Testing
+coverage/
+.nyc_output/
+test-output/
+
+# Playwright E2E Testing
+test-results/
+playwright-report/
+playwright/.cache/
+playwright-screenshots/
