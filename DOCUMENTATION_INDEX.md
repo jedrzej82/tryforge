@@ -42,7 +42,23 @@
 
 ---
 
-### 2. ARCHITECTURE.md
+### 2. ROADMAP.md
+**Co to jest:** Plan rozwoju i przyszłe funkcjonalności
+
+**Zawiera:**
+- Aktualny status projektu
+- Planowane funkcje (web crawling, big data, analytics)
+- Timeline rozwoju (2025-2027)
+- Zaawansowane możliwości (Ahrefs-level apps)
+- Jak możesz pomóc w rozwoju
+
+**Kiedy czytać:** Gdy chcesz wiedzieć dokąd zmierza TryForge
+
+**Czas czytania:** 10-15 minut
+
+---
+
+### 3. ARCHITECTURE.md
 **Co to jest:** Szczegółowa architektura systemu
 
 **Zawiera:**
@@ -61,7 +77,7 @@
 
 ---
 
-### 3. CREATE_MODE.md
+### 4. CREATE_MODE.md
 **Co to jest:** Kompletny przewodnik po tworzeniu aplikacji od zera
 
 **Zawiera:**
@@ -86,7 +102,7 @@
 
 ---
 
-### 4. REFACTOR_MODE.md
+### 5. REFACTOR_MODE.md
 **Co to jest:** Przewodnik po ulepszaniu istniejących aplikacji
 
 **Zawiera:**
@@ -112,7 +128,7 @@
 
 ---
 
-### 5. TRIPLE_AI_INTEGRATION.md
+### 6. TRIPLE_AI_INTEGRATION.md
 **Co to jest:** Jak współpracują Claude, GitHub Spark i Pollinations AI
 
 **Zawiera:**
@@ -135,7 +151,7 @@
 
 ---
 
-### 6. COMMANDS.md
+### 7. COMMANDS.md
 **Co to jest:** Reference wszystkich dostępnych komend
 
 **Zawiera:**
@@ -157,7 +173,7 @@
 
 ---
 
-### 7. SETUP.md
+### 8. SETUP.md
 **Co to jest:** Kompletna instrukcja instalacji
 
 **Zawiera:**
@@ -181,7 +197,7 @@
 
 ---
 
-### 8. WORKFLOWS.md
+### 9. WORKFLOWS.md
 **Co to jest:** Praktyczne scenariusze użycia end-to-end
 
 **Zawiera:**
@@ -203,7 +219,7 @@
 
 ---
 
-### 9. MEMORY_SYSTEM.md
+### 10. MEMORY_SYSTEM.md
 **Co to jest:** System pamięci i backupów - kluczowa innowacja
 
 **Zawiera:**

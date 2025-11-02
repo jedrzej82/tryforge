@@ -66,8 +66,11 @@ The most valuable contributions right now are:
 
 ## 🎨 What We Need
 
+See **[ROADMAP.md](ROADMAP.md)** for the complete feature roadmap and timeline.
+
 ### High Priority
 - [ ] English translation of Polish docs
+- [ ] Update all dependencies to latest stable versions
 - [ ] Video tutorials/demos
 - [ ] More real-world examples
 - [ ] Community use cases
@@ -77,6 +80,15 @@ The most valuable contributions right now are:
 - [ ] FAQ section
 - [ ] Performance benchmarks
 - [ ] Comparison with other tools
+
+### Advanced Features (See ROADMAP.md)
+- [ ] Web crawler and scraping capabilities
+- [ ] Big data processing (millions of records)
+- [ ] Advanced data visualization and dashboards
+- [ ] Real-time analytics system
+- [ ] API rate limiting and quotas system
+- [ ] Background job processing (queues, workers)
+- [ ] Committing all parallel agent work
 
 ### Low Priority
 - [ ] Logo and branding assets

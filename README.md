@@ -47,6 +47,7 @@ Start here: **[TRYFORGE_README.md](TRYFORGE_README.md)**
 
 **Complete Docs:**
 - [TRYFORGE_README.md](TRYFORGE_README.md) - Introduction
+- [ROADMAP.md](ROADMAP.md) - Feature roadmap and future plans
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture
 - [CREATE_MODE.md](CREATE_MODE.md) - Creating new apps
 - [REFACTOR_MODE.md](REFACTOR_MODE.md) - Improving existing apps
@@ -230,9 +231,26 @@ Backend:  http://localhost:3000
 
 ---
 
+## 🚀 Future Vision
+
+TryForge is evolving into a comprehensive platform for building enterprise-grade applications. Coming soon:
+
+**Advanced Capabilities:**
+- 🕷️ Web crawling and scraping (build SEO tools like Ahrefs)
+- 📊 Big data processing (handle millions of records)
+- 📈 Real-time analytics and dashboards
+- ⚡ Background job processing and queues
+- 🛡️ API rate limiting and quota systems
+- 🎨 Advanced data visualization
+
+See **[ROADMAP.md](ROADMAP.md)** for the complete feature timeline and how you can contribute.
+
+---
+
 ## 🌐 Links
 
 - **Website:** https://tryforge.dev
+- **Roadmap:** [ROADMAP.md](ROADMAP.md)
 - **Documentation:** You're reading it!
 - **Example Project:** This repository (statsmate-sports-ana)
 
