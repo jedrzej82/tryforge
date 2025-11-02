@@ -367,8 +367,23 @@
   <div class="container">
     <div id="alert-container"></div>
 
+    <!-- AI Provider Selector -->
+    <div class="card" style="margin-bottom: 2rem;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>🤖 AI Provider</label>
+        <select id="ai-provider" onchange="handleProviderChange()">
+          <option value="claude">Claude (Anthropic)</option>
+          <option value="openrouter">OpenRouter (Multiple Free Models)</option>
+        </select>
+        <div class="help-text">
+          Choose your AI provider. OpenRouter gives access to multiple free models including MiniMax M2.
+        </div>
+      </div>
+    </div>
+
     <div class="tabs">
-      <button class="tab active" data-tab="claude">🤖 Claude API</button>
+      <button class="tab active" data-tab="claude">🤖 Claude</button>
+      <button class="tab" data-tab="openrouter">🌐 OpenRouter</button>
       <button class="tab" data-tab="deployment">🚀 Deployment</button>
       <button class="tab" data-tab="github">📦 GitHub</button>
       <button class="tab" data-tab="database">🗄️ Database</button>
@@ -456,6 +471,62 @@
               3. Go to Application → Cookies<br>
               4. Copy the value of "sessionKey" cookie
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OpenRouter Tab -->
+    <div id="tab-openrouter" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">🌐 OpenRouter Configuration</h2>
+        </div>
+
+        <div class="form-group">
+          <label>API Key</label>
+          <div class="input-with-test">
+            <input
+              type="password"
+              id="openrouter-api-key"
+              placeholder="sk-or-v1-..."
+            >
+            <button class="btn btn-secondary btn-test" onclick="testKey('openrouter')">
+              Test
+            </button>
+          </div>
+          <div class="help-text">
+            Get your free API key from <a href="https://openrouter.ai/keys" target="_blank">OpenRouter Dashboard</a>
+          </div>
+          <div id="openrouter-test-result"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Default Model</label>
+          <select id="openrouter-model">
+            <option value="minimax/minimax-01">🆓 MiniMax M2 (200K context) - FREE</option>
+            <option value="google/gemini-flash-1.5">🆓 Google Gemini Flash 1.5 (1M context) - FREE</option>
+            <option value="google/gemini-flash-1.5-8b">🆓 Google Gemini Flash 1.5 8B (1M context) - FREE</option>
+            <option value="meta-llama/llama-3.2-3b-instruct:free">🆓 Meta Llama 3.2 3B (128K context) - FREE</option>
+            <option value="meta-llama/llama-3.1-8b-instruct:free">🆓 Meta Llama 3.1 8B (128K context) - FREE</option>
+            <option value="microsoft/phi-3-medium-128k-instruct:free">🆓 Microsoft Phi-3 Medium (128K context) - FREE</option>
+            <option value="qwen/qwen-2-7b-instruct:free">🆓 Qwen 2 7B (32K context) - FREE</option>
+          </select>
+          <div class="help-text">
+            All models marked 🆓 are completely free! MiniMax M2 is recommended for best performance.
+          </div>
+        </div>
+
+        <div class="alert alert-success">
+          <span class="icon">✨</span>
+          <div>
+            <strong>Why OpenRouter?</strong><br>
+            • Access to 7+ free AI models<br>
+            • No API costs for free models<br>
+            • MiniMax M2 with 200K context window<br>
+            • Google Gemini with 1M context window<br>
+            • Easy switching between models<br>
+            • Perfect for development and production
           </div>
         </div>
       </div>
@@ -716,6 +787,19 @@
       }
     }
 
+    // Handle AI provider change
+    function handleProviderChange() {
+      const provider = document.getElementById('ai-provider').value;
+
+      // Show appropriate tab
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      const targetTab = provider === 'openrouter' ? 'openrouter' : 'claude';
+      document.querySelector(`[data-tab="${targetTab}"]`).classList.add('active');
+      document.getElementById(`tab-${targetTab}`).classList.add('active');
+    }
+
     // Load configuration
     async function loadConfig() {
       try {
@@ -735,6 +819,9 @@
 
     // Populate form with config data
     function populateForm(config) {
+      // AI Provider
+      document.getElementById('ai-provider').value = config.aiProvider || 'claude';
+
       // Claude
       document.getElementById('claude-auth-mode').value = config.claude?.authMode || 'api';
       if (config.claude?.apiKey) {
@@ -747,6 +834,12 @@
 
       // Toggle mode display
       toggleClaudeAuthMode();
+
+      // OpenRouter
+      if (config.openrouter?.apiKey) {
+        document.getElementById('openrouter-api-key').placeholder = config.openrouter.apiKey;
+      }
+      document.getElementById('openrouter-model').value = config.openrouter?.model || 'minimax/minimax-01';
 
       // Deployment
       if (config.deployment?.vercel) {
@@ -783,11 +876,16 @@
     // Save configuration
     async function saveConfig() {
       const updates = {
+        aiProvider: document.getElementById('ai-provider').value,
         claude: {
           authMode: document.getElementById('claude-auth-mode').value,
           apiKey: document.getElementById('claude-api-key').value || undefined,
           sessionToken: document.getElementById('claude-session-token').value || undefined,
           organizationId: document.getElementById('claude-organization-id').value || undefined
+        },
+        openrouter: {
+          apiKey: document.getElementById('openrouter-api-key').value || undefined,
+          model: document.getElementById('openrouter-model').value
         },
         github: {
           username: document.getElementById('github-username').value,
@@ -852,6 +950,7 @@
       const keyMap = {
         'claude': 'claude-api-key',
         'claude-subscription': 'claude-session-token',
+        'openrouter': 'openrouter-api-key',
         'vercel': 'vercel-token',
         'netlify': 'netlify-token',
         'railway': 'railway-token',

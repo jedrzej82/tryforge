@@ -115,11 +115,16 @@ class ConfigManager {
    */
   formatConfigForDisplay(config) {
     const formatted = {
+      aiProvider: config.AI_PROVIDER || 'claude',
       claude: {
         authMode: config.CLAUDE_AUTH_MODE || 'api',
         apiKey: this.maskValue(config.ANTHROPIC_API_KEY),
         sessionToken: this.maskValue(config.CLAUDE_SESSION_TOKEN),
         organizationId: config.CLAUDE_ORGANIZATION_ID || '',
+      },
+      openrouter: {
+        apiKey: this.maskValue(config.OPENROUTER_API_KEY),
+        model: config.OPENROUTER_MODEL || 'minimax/minimax-01',
       },
       github: {
         username: config.GITHUB_USERNAME || '',
@@ -190,6 +195,10 @@ class ConfigManager {
     const encryptedStore = {};
 
     // Update values
+    if (updates.aiProvider) {
+      currentEnv.AI_PROVIDER = updates.aiProvider;
+    }
+
     if (updates.claude?.authMode) {
       currentEnv.CLAUDE_AUTH_MODE = updates.claude.authMode;
     }
@@ -209,6 +218,17 @@ class ConfigManager {
     }
     if (updates.claude?.organizationId) {
       currentEnv.CLAUDE_ORGANIZATION_ID = updates.claude.organizationId;
+    }
+
+    if (updates.openrouter?.apiKey) {
+      currentEnv.OPENROUTER_API_KEY = updates.openrouter.apiKey;
+      encryptedStore.OPENROUTER_API_KEY = {
+        encrypted: true,
+        value: this.encrypt(updates.openrouter.apiKey),
+      };
+    }
+    if (updates.openrouter?.model) {
+      currentEnv.OPENROUTER_MODEL = updates.openrouter.model;
     }
 
     if (updates.github?.username) {
@@ -302,8 +322,13 @@ class ConfigManager {
     content += '# Managed by Admin Panel\n';
     content += `# Last updated: ${new Date().toISOString()}\n\n`;
 
+    // AI Provider Selection
+    content += '# AI Provider Selection\n';
+    content += '# Choose: "claude" or "openrouter"\n';
+    content += `AI_PROVIDER=${config.AI_PROVIDER || 'claude'}\n\n`;
+
     // Claude API
-    content += '# Claude Configuration (REQUIRED for AI code generation)\n';
+    content += '# Claude Configuration\n';
     content += '# Auth Mode: "api" for API Key or "subscription" for Claude Pro/Max tokens\n';
     content += `CLAUDE_AUTH_MODE=${config.CLAUDE_AUTH_MODE || 'api'}\n\n`;
     content += '# API Key (for api mode)\n';
@@ -311,6 +336,12 @@ class ConfigManager {
     content += '# Subscription Token (for subscription mode - Claude Pro/Max)\n';
     content += `CLAUDE_SESSION_TOKEN=${config.CLAUDE_SESSION_TOKEN || 'sessKey-ant-your-session-token-here'}\n`;
     content += `CLAUDE_ORGANIZATION_ID=${config.CLAUDE_ORGANIZATION_ID || ''}\n\n`;
+
+    // OpenRouter API
+    content += '# OpenRouter Configuration (Access to multiple free AI models)\n';
+    content += `OPENROUTER_API_KEY=${config.OPENROUTER_API_KEY || 'sk-or-v1-your-key-here'}\n`;
+    content += '# Default model (minimax/minimax-01 is free!)\n';
+    content += `OPENROUTER_MODEL=${config.OPENROUTER_MODEL || 'minimax/minimax-01'}\n\n`;
 
     // GitHub
     content += '# GitHub Configuration\n';
@@ -366,7 +397,9 @@ class ConfigManager {
    */
   getDefaultConfig() {
     return {
+      aiProvider: 'claude',
       claude: { authMode: 'api', apiKey: '', sessionToken: '', organizationId: '' },
+      openrouter: { apiKey: '', model: 'minimax/minimax-01' },
       github: { username: '', email: '' },
       deployment: { vercel: '', netlify: '', railway: '', render: '' },
       database: { url: '', user: '' },
@@ -385,6 +418,8 @@ class ConfigManager {
         return await this.testClaudeKey(key);
       case 'claude-subscription':
         return await this.testClaudeSubscriptionToken(key);
+      case 'openrouter':
+        return await this.testOpenRouterKey(key);
       case 'vercel':
         return await this.testVercelKey(key);
       case 'netlify':
@@ -461,6 +496,40 @@ class ConfigManager {
         valid: false,
         message: 'Invalid Claude subscription token',
         error: 'Please check your session token from claude.ai cookies',
+      };
+    }
+  }
+
+  /**
+   * Test OpenRouter API key
+   */
+  async testOpenRouterKey(apiKey) {
+    try {
+      // Test with a minimal request to OpenRouter
+      const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          valid: true,
+          message: 'OpenRouter API key is valid',
+          details: `Credits: $${data.data?.usage || 0} | Limit: $${data.data?.limit || 'Unlimited'}`,
+        };
+      }
+
+      return {
+        valid: false,
+        message: 'Invalid OpenRouter API key',
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        message: 'Error testing OpenRouter key',
+        error: error.message,
       };
     }
   }
