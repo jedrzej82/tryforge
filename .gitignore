@@ -1,0 +1,53 @@
+# TryForge .gitignore
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Editor directories
+.vscode/
+.idea/
+*.sublime-*
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Node modules (if any examples)
+node_modules/
+package-lock.json
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build outputs (if any)
+dist/
+build/
+
+# User-specific files
+.user/
+*.user.md
+
+# Cache
+.cache/
+*.cache
+
+# Backups
+*.bak
+backup/
+
+# IDE
+*.iml
+.classpath
+.project
+.settings/
