@@ -238,6 +238,81 @@ program
     await ModelsCommand.analyze(options);
   });
 
+// GRAPHICS Commands - Autonomous Graphics Generation
+program
+  .command('graphics:generate')
+  .description('Automatically generate professional graphics')
+  .option('-d, --description <desc>', 'Application description')
+  .option('-r, --requirements <file>', 'Requirements JSON file')
+  .option('-t, --type <type>', 'Application type (e-commerce|blog|dashboard|saas)')
+  .option('-n, --name <name>', 'Application name')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .option('-o, --output <dir>', 'Output directory', 'public/images')
+  .option('--style <style>', 'Graphics style (modern|minimalist|professional)', 'modern')
+  .option('--colors <scheme>', 'Color scheme', 'blue and white')
+  .option('--quality <percent>', 'Image quality (1-100)', '90')
+  .option('--no-enrich', 'Skip AI enrichment')
+  .option('--no-variations', 'Skip generating variations')
+  .option('--no-optimize', 'Skip image optimization')
+  .option('-v, --verbose', 'Verbose output')
+  .action(async (options) => {
+    const GraphicsCommand = require('./commands/graphics');
+    await GraphicsCommand.generate(options);
+  });
+
+program
+  .command('graphics:detect')
+  .description('Detect and generate missing graphics from code')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .option('-o, --output <dir>', 'Output directory', 'public/images')
+  .option('--quality <percent>', 'Image quality (1-100)', '90')
+  .option('-v, --verbose', 'Verbose output')
+  .action(async (options) => {
+    const GraphicsCommand = require('./commands/graphics');
+    await GraphicsCommand.detect(options);
+  });
+
+program
+  .command('graphics:watch')
+  .description('Watch and auto-generate missing graphics')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .option('-o, --output <dir>', 'Output directory', 'public/images')
+  .option('--quality <percent>', 'Image quality (1-100)', '90')
+  .action(async (options) => {
+    const GraphicsCommand = require('./commands/graphics');
+    await GraphicsCommand.watch(options);
+  });
+
+program
+  .command('graphics:list')
+  .description('List all graphics in project')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .action(async (options) => {
+    const GraphicsCommand = require('./commands/graphics');
+    await GraphicsCommand.list(options);
+  });
+
+program
+  .command('graphics:analyze')
+  .description('Analyze graphics and provide optimization insights')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .action(async (options) => {
+    const GraphicsCommand = require('./commands/graphics');
+    await GraphicsCommand.analyze(options);
+  });
+
+program
+  .command('graphics:type <type>')
+  .description('Generate specific graphic type (logo|favicon|hero|og-image)')
+  .option('-n, --name <name>', 'Application name')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .option('-o, --output <dir>', 'Output directory', 'public/images')
+  .option('--style <style>', 'Graphics style')
+  .action(async (type, options) => {
+    const GraphicsCommand = require('./commands/graphics');
+    await GraphicsCommand.generateType(type, options);
+  });
+
 // Interactive mode (no args)
 if (process.argv.length === 2) {
   console.log(chalk.cyan.bold('\n🔥 TryForge - Triple AI Application Framework\n'));
@@ -249,8 +324,9 @@ if (process.argv.length === 2) {
   console.log(chalk.gray('  • AI-powered auto-fix and code improvements\n'));
   console.log(chalk.white('🚀 Quick Start:'));
   console.log(chalk.gray('  $ tryforge admin                       # Configure API keys'));
-  console.log(chalk.gray('  $ tryforge create "Blog platform"      # Create app'));
+  console.log(chalk.gray('  $ tryforge create "Blog platform"      # Create complete app'));
   console.log(chalk.gray('  $ tryforge models:generate -d "..."    # Auto-generate models'));
+  console.log(chalk.gray('  $ tryforge graphics:generate -t blog   # Auto-generate graphics'));
   console.log(chalk.gray('  $ tryforge preview                     # Live preview'));
   console.log(chalk.gray('  $ tryforge generate component "..."    # AI code gen'));
   console.log(chalk.gray('  $ tryforge deploy vercel               # Deploy\n'));

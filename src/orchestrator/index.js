@@ -310,8 +310,14 @@ Style: ${architecture.design?.style || 'modern'} with ${architecture.design?.col
 
     const spinner = ora('Generating project files...').start();
 
-    // Generate actual project files
-    await generator.generate(results);
+    // Generate actual project files with AI graphics generation
+    await generator.generate(results, {
+      autoGraphics: this.options.graphics !== false, // Auto-generate graphics unless disabled
+      graphicsStyle: this.options.graphics || results.architecture.design?.style || 'modern',
+      colorScheme: this.options.colors || results.architecture.design?.colors,
+      enrichGraphics: true,
+      graphicsVariations: true
+    });
     spinner.succeed('Project files generated');
 
     // Install dependencies

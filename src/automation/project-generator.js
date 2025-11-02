@@ -18,7 +18,7 @@ class ProjectGenerator {
   /**
    * Generate complete project
    */
-  async generate(results) {
+  async generate(results, options = {}) {
     const { graphics, frontend, backend } = results;
 
     // Create project structure
@@ -30,8 +30,20 @@ class ProjectGenerator {
     // Generate backend from template
     await this.generateBackend(backend);
 
-    // Copy graphics assets
-    await this.copyGraphics(graphics);
+    // Copy graphics assets (if provided)
+    if (graphics && graphics.length > 0) {
+      await this.copyGraphics(graphics);
+    }
+
+    // Generate professional graphics with AI (NEW!)
+    if (options.autoGraphics !== false) {
+      await this.generateGraphicsWithAI({
+        style: options.graphicsStyle,
+        colorScheme: options.colorScheme,
+        autoEnrich: options.enrichGraphics !== false,
+        generateVariations: options.graphicsVariations !== false
+      });
+    }
 
     // Generate configuration files
     await this.generateConfig();
@@ -414,6 +426,68 @@ module.exports = ${this.toPascalCase(table)};
         const dest = path.join(assetsDir, path.basename(graphic.path));
         await fs.copy(graphic.path, dest);
       }
+    }
+  }
+
+  /**
+   * Generate professional graphics using AI
+   * Integrated with AutonomousGraphicsSystem
+   */
+  async generateGraphicsWithAI(options = {}) {
+    console.log(chalk.cyan('\n🎨 Generating professional graphics with AI...\n'));
+
+    try {
+      const AutonomousGraphicsSystem = require('./autonomous-graphics-system');
+
+      const graphicsSystem = new AutonomousGraphicsSystem({
+        outputDir: 'public/images',
+        quality: 90,
+        optimize: true,
+        autoEnrich: options.autoEnrich !== false,
+        generateVariations: options.generateVariations !== false
+      });
+
+      // Prepare requirements from project architecture
+      const requirements = {
+        name: this.projectName,
+        type: this.architecture.type || 'web application',
+        description: this.architecture.description || `${this.projectName} application`,
+        features: this.architecture.features || [],
+        style: options.style || this.architecture.style || 'modern professional',
+        colorScheme: options.colorScheme || this.architecture.colors || 'blue and white',
+        targetAudience: this.architecture.targetAudience || 'general users'
+      };
+
+      // Generate all missing graphics
+      const result = await graphicsSystem.generateMissingGraphics(
+        requirements,
+        this.projectPath
+      );
+
+      if (result.success && result.successful > 0) {
+        console.log(chalk.green(`✅ Generated ${result.successful} professional graphics`));
+        console.log(chalk.gray(`   Output: public/images/`));
+
+        // Copy generated graphics to frontend assets
+        const publicImagesDir = path.join(this.projectPath, 'public', 'images');
+        const frontendAssetsDir = path.join(this.projectPath, 'frontend', 'public', 'images');
+
+        if (await fs.pathExists(publicImagesDir)) {
+          await fs.ensureDir(frontendAssetsDir);
+          await fs.copy(publicImagesDir, frontendAssetsDir);
+          console.log(chalk.gray('   ✓ Copied to frontend assets'));
+        }
+
+        return result;
+      } else {
+        console.log(chalk.yellow('⚠️  No graphics generated (may already exist)'));
+        return result;
+      }
+
+    } catch (error) {
+      console.error(chalk.red('❌ Graphics generation failed:'), error.message);
+      console.log(chalk.yellow('⚠️  Continuing without generated graphics...'));
+      return { success: false, error: error.message };
     }
   }
 
