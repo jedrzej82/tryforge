@@ -17,6 +17,7 @@ const AnalyticsEngine = require('./core/analytics');
 const BigDataProcessor = require('./core/big-data');
 const DataVisualization = require('./core/visualization');
 const AdvancedTemplates = require('./core/advanced-templates');
+const AgencyTools = require('./core/agency-tools');
 const Logger = require('./utils/logger');
 
 class TryForge {
@@ -39,8 +40,9 @@ class TryForge {
     this.bigData = new BigDataProcessor(config);
     this.visualization = new DataVisualization();
     this.templates = new AdvancedTemplates();
+    this.agency = new AgencyTools(config);
     
-    this.logger.info('✅ TryForge initialized with all modules');
+    this.logger.info('✅ TryForge initialized with all modules including Agency Tools');
   }
 
   // Project Management
@@ -193,6 +195,54 @@ class TryForge {
     return this.templates.listTemplates();
   }
 
+  // Agency Management Methods
+  async createClient(clientData) {
+    this.logger.info(`👤 Creating client: ${clientData.name}`);
+    return await this.agency.createClient(clientData);
+  }
+
+  async createClientProject(clientId, projectData) {
+    this.logger.info(`📁 Creating client project for: ${clientId}`);
+    return await this.agency.createClientProject(clientId, projectData);
+  }
+
+  async generateProposal(proposalData) {
+    this.logger.info(`📄 Generating proposal`);
+    return await this.agency.generateProposal(proposalData);
+  }
+
+  async exportProposal(proposalId, format = 'html') {
+    this.logger.info(`📤 Exporting proposal: ${proposalId}`);
+    return await this.agency.exportProposal(proposalId, format);
+  }
+
+  async trackTime(timeData) {
+    this.logger.info(`⏱️ Tracking time entry`);
+    return await this.agency.trackTime(timeData);
+  }
+
+  async generateInvoice(invoiceData) {
+    this.logger.info(`💰 Generating invoice`);
+    return await this.agency.generateInvoice(invoiceData);
+  }
+
+  async addTeamMember(memberData) {
+    this.logger.info(`👥 Adding team member: ${memberData.name}`);
+    return await this.agency.addTeamMember(memberData);
+  }
+
+  getClientPortalData(clientId) {
+    return this.agency.getClientPortalData(clientId);
+  }
+
+  getTeamDashboard() {
+    return this.agency.getTeamDashboard();
+  }
+
+  getProjectTimeSummary(projectId) {
+    return this.agency.getProjectTimeSummary(projectId);
+  }
+
   // Utility Methods
   getSystemStatus() {
     return {
@@ -210,7 +260,8 @@ class TryForge {
         analytics: 'active',
         bigData: 'active',
         visualization: 'active',
-        templates: 'active'
+        templates: 'active',
+        agency: 'active'
       },
       version: '1.0.0',
       uptime: process.uptime()
@@ -269,5 +320,6 @@ module.exports.AnalyticsEngine = AnalyticsEngine;
 module.exports.BigDataProcessor = BigDataProcessor;
 module.exports.DataVisualization = DataVisualization;
 module.exports.AdvancedTemplates = AdvancedTemplates;
+module.exports.AgencyTools = AgencyTools;
 module.exports.Logger = Logger;
 

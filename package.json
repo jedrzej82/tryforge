@@ -1,16 +1,17 @@
 {
   "name": "tryforge",
   "version": "1.0.0",
-  "description": "Triple AI Application Framework - Build production-ready apps in minutes",
+  "description": "Complete Enterprise Application Development Platform - All-in-one integrated application",
   "main": "src/index.js",
   "bin": {
     "tryforge": "./bin/tryforge.js"
   },
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "cli": "node bin/tryforge.js",
     "test": "jest --coverage",
-    "lint": "eslint src/",
-    "dev": "nodemon src/index.js"
+    "lint": "eslint src/"
   },
   "keywords": [
     "ai",
@@ -19,7 +20,11 @@
     "github-spark",
     "pollinations",
     "triple-ai",
-    "rapid-development"
+    "rapid-development",
+    "visual-editor",
+    "workflow-automation",
+    "agency-tools",
+    "enterprise"
   ],
   "author": "TryForge Team",
   "license": "MIT",

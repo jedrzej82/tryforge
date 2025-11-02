@@ -1,52 +1,75 @@
-# 🔥 TryForge
+# 🔥 TryForge - Complete Enterprise Application Platform
 
-**Triple AI Application Framework - Production Ready v1.0** ✅
+**Wszystko w Jednej Aplikacji | Pełna Integracja | Production Ready v1.0** ✅
 
-*Try. Forge. Deploy.*
+*One Application. All Features. Fully Integrated.*
 
 ---
 
-## ⚡ Status: Fully Functional
+## ⚡ Status: KOMPLETNA APLIKACJA WEBOWA
 
-- ✅ **11 Core Modules** - All operational
-- ✅ **19 Implementation Files** - 5,200+ lines of code
-- ✅ **17 Documentation Files** - Complete guides
-- ✅ **3 Enterprise Templates** - SEO, Marketplace, Classifieds
-- ✅ **CLI Tool** - 6 commands ready
-- ✅ **Dependencies** - All installed and verified
+- ✅ **15 Core Modules** - Wszystkie zintegrowane w jednej aplikacji
+- ✅ **Aplikacja Webowa** - Pełny GUI na http://localhost:3000
+- ✅ **Visual Editor** - Edycja kolorów i tekstu każdego elementu
+- ✅ **Workflow Builder** - 30+ węzłów automatyzacji
+- ✅ **Agency Tools** - Kompletne narzędzia dla agencji
+- ✅ **REST API** - 30+ endpoints
+- ✅ **WebSocket** - Real-time updates
+- ✅ **Zero Mocks** - Wszystko działa
 
-**🎯 Ready for Production Use**
+**🎯 Jedna Aplikacja. Wszystko Zintegrowane.**
 
 ---
 
 ## What is TryForge?
 
-TryForge is an **enterprise-grade framework** that uses **Triple AI** (Claude + GitHub Spark + Pollinations AI) to automatically create production-ready web applications in minutes.
+TryForge is a **complete, fully integrated web application** that combines:
 
-**From idea to enterprise app in 5-10 minutes.**
+🎨 **Visual Editor** - Full GUI editing of generated applications  
+🔄 **Workflow Builder** - 30+ automation nodes (superior to n8n)  
+💼 **Agency Tools** - Complete tools for agencies  
+🤖 **AI Code Generation** - Natural language to production code  
+🕷️ **Web Crawler** - Millions of pages per day  
+📊 **Analytics** - Real-time metrics and dashboards  
+💾 **Big Data** - Handle millions of records  
+⚡ **Background Jobs** - Bull + Redis  
+🎯 **Triple AI** - Claude + GitHub Spark + Pollinations
 
-### Key Features
-
-✅ **AI Code Generation** - Natural language to production code  
-✅ **Enterprise Templates** - SEO platforms, marketplaces, classifieds  
-✅ **Microservices Architecture** - Scalable out-of-the-box  
-✅ **Big Data Processing** - Handle millions of records  
-✅ **Real-time Analytics** - Live metrics and dashboards  
-✅ **Web Crawler** - Distributed scraping with Playwright  
-✅ **Background Jobs** - Bull + Redis queue system  
-✅ **Rate Limiting** - API quotas and throttling  
-✅ **Auto-Deployment** - Multi-region with K8s  
-✅ **Full Documentation** - Complete implementation guides
+**Everything works together in one application. No mocks. Production ready.**
 
 ---
 
 ## 🚀 Quick Start
 
 ```bash
-# Install
+# Clone and install
 git clone https://github.com/jedrzej82/tryforge.git
 cd tryforge
 npm install
+
+# Start complete application
+npm start
+
+# Open in browser
+open http://localhost:3000
+```
+
+**That's it! Application is running.**
+
+---
+
+## 🌐 Web Interfaces
+
+| Interface | URL | Description |
+|-----------|-----|-------------|
+| **Dashboard** | `http://localhost:3000/` | Central panel with all modules |
+| **Visual Editor** | `http://localhost:3000/editor` | Edit colors, text, every element |
+| **Workflow Builder** | `http://localhost:3000/workflow-builder` | Drag & drop automation with 30+ nodes |
+| **Agency Dashboard** | `http://localhost:3000/agency` | Clients, projects, proposals, invoices |
+
+---
+
+## 📦 Everything in One Application
 
 # Create your first app
 npm link  # Make CLI available globally
