@@ -4,16 +4,28 @@
  */
 
 const Logger = require('../utils/logger');
+const FreelanceExtensions = require('./freelance-extensions');
 
 class AdvancedTemplates {
   constructor() {
     this.logger = new Logger();
+    this.freelanceExtensions = new FreelanceExtensions();
+    
     this.templates = {
       'seo-platform': this.getSEOPlatformTemplate(),
       'marketplace': this.getMarketplaceTemplate(),
       'classifieds': this.getClassifiedsTemplate(),
       'analytics-platform': this.getAnalyticsPlatformTemplate(),
-      'seo-tool': this.getSEOToolTemplate()
+      'seo-tool': this.getSEOToolTemplate(),
+      // New freelance templates
+      'mobile-app': this.freelanceExtensions.getMobileTemplate(),
+      'desktop-app': this.freelanceExtensions.getDesktopTemplate(),
+      'game-2d': this.freelanceExtensions.getGameTemplate(),
+      'iot-platform': this.freelanceExtensions.getIoTTemplate(),
+      'nft-marketplace': this.freelanceExtensions.getBlockchainTemplate(),
+      'video-platform': this.freelanceExtensions.getVideoTemplate(),
+      'headless-cms': this.freelanceExtensions.getCMSTemplate(),
+      'lms': this.freelanceExtensions.getLMSTemplate()
     };
   }
 

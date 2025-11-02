@@ -18,6 +18,7 @@ const BigDataProcessor = require('./core/big-data');
 const DataVisualization = require('./core/visualization');
 const AdvancedTemplates = require('./core/advanced-templates');
 const AgencyTools = require('./core/agency-tools');
+const FreelanceExtensions = require('./core/freelance-extensions');
 const Logger = require('./utils/logger');
 
 class TryForge {
@@ -41,8 +42,9 @@ class TryForge {
     this.visualization = new DataVisualization();
     this.templates = new AdvancedTemplates();
     this.agency = new AgencyTools(config);
+    this.freelance = new FreelanceExtensions();
     
-    this.logger.info('✅ TryForge initialized with all modules including Agency Tools');
+    this.logger.info('✅ TryForge initialized with all 16 modules including Freelance Extensions');
   }
 
   // Project Management
@@ -261,7 +263,8 @@ class TryForge {
         bigData: 'active',
         visualization: 'active',
         templates: 'active',
-        agency: 'active'
+        agency: 'active',
+        freelance: 'active'
       },
       version: '1.0.0',
       uptime: process.uptime()
