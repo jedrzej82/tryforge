@@ -177,6 +177,67 @@ program
     await GenerateCommand.execute(type, description, options);
   });
 
+// MODELS Commands - Autonomous Model Generation
+program
+  .command('models:generate')
+  .description('Automatically generate missing database models')
+  .option('-d, --description <desc>', 'Application description')
+  .option('-r, --requirements <file>', 'Requirements JSON file')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .option('--orm <type>', 'ORM type (prisma|sequelize|typeorm|mongoose)', 'prisma')
+  .option('--language <lang>', 'Language (typescript|javascript)', 'typescript')
+  .option('--no-enrich', 'Skip AI enrichment')
+  .option('--no-migrations', 'Skip migration generation')
+  .option('-i, --interactive', 'Interactive mode with confirmations')
+  .option('-v, --verbose', 'Verbose output')
+  .action(async (options) => {
+    const ModelsCommand = require('./commands/models');
+    await ModelsCommand.generate(options);
+  });
+
+program
+  .command('models:detect')
+  .description('Detect and generate missing models from code')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .option('--orm <type>', 'ORM type', 'prisma')
+  .option('--language <lang>', 'Language', 'typescript')
+  .option('--no-migrations', 'Skip migration generation')
+  .option('-v, --verbose', 'Verbose output')
+  .action(async (options) => {
+    const ModelsCommand = require('./commands/models');
+    await ModelsCommand.detect(options);
+  });
+
+program
+  .command('models:watch')
+  .description('Watch and auto-generate missing models')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .option('--orm <type>', 'ORM type', 'prisma')
+  .option('--language <lang>', 'Language', 'typescript')
+  .action(async (options) => {
+    const ModelsCommand = require('./commands/models');
+    await ModelsCommand.watch(options);
+  });
+
+program
+  .command('models:list')
+  .description('List existing models in project')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .action(async (options) => {
+    const ModelsCommand = require('./commands/models');
+    await ModelsCommand.list(options);
+  });
+
+program
+  .command('models:analyze')
+  .description('Analyze models and suggest improvements')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .option('--orm <type>', 'ORM type', 'prisma')
+  .action(async (options) => {
+    const ModelsCommand = require('./commands/models');
+    await ModelsCommand.analyze(options);
+  });
+
 // Interactive mode (no args)
 if (process.argv.length === 2) {
   console.log(chalk.cyan.bold('\n🔥 TryForge - Triple AI Application Framework\n'));
@@ -187,11 +248,12 @@ if (process.argv.length === 2) {
   console.log(chalk.gray('  • One-click deployment to Vercel/Netlify/Railway'));
   console.log(chalk.gray('  • AI-powered auto-fix and code improvements\n'));
   console.log(chalk.white('🚀 Quick Start:'));
-  console.log(chalk.gray('  $ tryforge admin                      # Configure API keys'));
-  console.log(chalk.gray('  $ tryforge create "Blog platform"     # Create app'));
-  console.log(chalk.gray('  $ tryforge preview                    # Live preview'));
-  console.log(chalk.gray('  $ tryforge generate component "..."   # AI code gen'));
-  console.log(chalk.gray('  $ tryforge deploy vercel              # Deploy\n'));
+  console.log(chalk.gray('  $ tryforge admin                       # Configure API keys'));
+  console.log(chalk.gray('  $ tryforge create "Blog platform"      # Create app'));
+  console.log(chalk.gray('  $ tryforge models:generate -d "..."    # Auto-generate models'));
+  console.log(chalk.gray('  $ tryforge preview                     # Live preview'));
+  console.log(chalk.gray('  $ tryforge generate component "..."    # AI code gen'));
+  console.log(chalk.gray('  $ tryforge deploy vercel               # Deploy\n'));
   console.log(chalk.white('📚 More commands:'));
   console.log(chalk.gray('  $ tryforge --help\n'));
   process.exit(0);
