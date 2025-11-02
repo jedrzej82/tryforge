@@ -1,51 +1,69 @@
 /**
  * Triple AI Orchestrator
- * Coordinates Claude, GitHub Spark, and Pollinations AI
+ * Coordinates OpenRouter (Minimax M2 + Claude), GitHub Spark, and Pollinations AI
  */
 
 const axios = require('axios');
 const Logger = require('../utils/logger');
+const OpenRouterClient = require('./openrouter-client');
+const PollinationsClient = require('./pollinations-client');
 
 class TripleAI {
   constructor(config = {}) {
     this.config = config;
     this.logger = new Logger();
     
-    // AI Service endpoints
-    this.claude = {
-      endpoint: process.env.CLAUDE_API_ENDPOINT || 'https://api.anthropic.com/v1',
-      apiKey: process.env.CLAUDE_API_KEY || config.claudeKey
-    };
+    // Initialize AI clients
+    this.openRouter = new OpenRouterClient({
+      apiKey: process.env.OPENROUTER_API_KEY || config.openRouterKey,
+      preferFree: config.preferFree !== false
+    });
     
+    this.pollinations = new PollinationsClient({
+      defaultStyle: config.defaultStyle || 'realistic',
+      cacheEnabled: config.cacheGraphics !== false
+    });
+    
+    // GitHub Spark for UI
     this.githubSpark = {
       endpoint: process.env.GITHUB_SPARK_ENDPOINT || 'https://spark.github.com/api',
       token: process.env.GITHUB_TOKEN || config.githubToken
     };
     
-    this.pollinations = {
-      endpoint: 'https://image.pollinations.ai'
+    // Claude Code Max (premium fallback)
+    this.claude = {
+      endpoint: process.env.CLAUDE_API_ENDPOINT || 'https://api.anthropic.com/v1',
+      apiKey: process.env.CLAUDE_CODE_MAX_TOKEN || process.env.CLAUDE_API_KEY || config.claudeKey
     };
   }
 
   /**
-   * Generate project architecture using Claude
+   * Generate project architecture using AI
    */
   async generateArchitecture(projectDescription, options = {}) {
-    this.logger.info('Claude: Generating project architecture...');
+    this.logger.info('AI: Generating project architecture...');
     
     const prompt = `Create a detailed architecture for: ${projectDescription}
     Type: ${options.type || 'webapp'}
-    Include: database schema, API endpoints, components, and file structure.`;
+    Include: database schema, API endpoints, components, and file structure.
+    
+    Provide a complete, production-ready architecture.`;
     
     try {
-      // Simulate Claude API call
-      // In production, this would call actual Claude API
-      const architecture = {
-        database: this.generateDatabaseSchema(projectDescription, options),
-        api: this.generateAPIEndpoints(projectDescription, options),
-        frontend: this.generateFrontendStructure(projectDescription, options),
-        backend: this.generateBackendStructure(projectDescription, options)
-      };
+      // Use OpenRouter (Minimax M2 - FREE)
+      const result = await this.openRouter.generateCode({
+        description: projectDescription,
+        language: options.language || 'javascript',
+        framework: options.framework,
+        features: options.features || []
+      });
+      
+      this.logger.info(`AI: Architecture generated using ${result.model} (${result.free ? 'FREE' : 'PAID'})`);
+      
+      const architecture = this.parseArchitecture(result.content);
+      architecture.aiModel = result.model;
+      architecture.cost = result.cost;
+      architecture.free = result.free;
       
       return architecture;
     } catch (error) {
