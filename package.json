@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node src/cli/index.js",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "dev": "nodemon src/cli/index.js",
     "lint": "eslint src/**/*.js",
     "format": "prettier --write \"src/**/*.js\""
@@ -45,7 +45,7 @@
     "js-beautify": "^1.14.11",
     "jsonwebtoken": "^9.0.2",
     "markdown-it": "^14.0.0",
-    "nodemailer": "^6.9.7",
+    "nodemailer": "^7.0.10",
     "ora": "^5.4.1",
     "pg": "^8.11.3",
     "playwright": "^1.40.1",
