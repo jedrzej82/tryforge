@@ -1,0 +1,25 @@
+{
+  "name": "tryforge-plugin-code-formatter",
+  "version": "1.0.0",
+  "description": "Code formatter plugin for TryForge",
+  "main": "index.js",
+  "keywords": ["tryforge", "plugin", "formatter", "transformer"],
+  "author": "TryForge Team",
+  "license": "MIT",
+  "tryforge": {
+    "type": "transformer",
+    "version": "1.0.0",
+    "hooks": ["after:generate", "after:create"],
+    "permissions": ["filesystem:read", "filesystem:write"],
+    "compatibility": {
+      "node": ">=18.0.0",
+      "tryforge": ">=1.0.0"
+    }
+  },
+  "peerDependencies": {
+    "tryforge": ">=1.0.0"
+  },
+  "dependencies": {
+    "prettier": "^3.1.0"
+  }
+}

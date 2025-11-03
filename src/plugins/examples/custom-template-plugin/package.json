@@ -1,0 +1,22 @@
+{
+  "name": "tryforge-plugin-custom-template",
+  "version": "1.0.0",
+  "description": "Custom template plugin for TryForge",
+  "main": "index.js",
+  "keywords": ["tryforge", "plugin", "template"],
+  "author": "TryForge Team",
+  "license": "MIT",
+  "tryforge": {
+    "type": "template",
+    "version": "1.0.0",
+    "hooks": ["template:load", "template:render"],
+    "permissions": ["filesystem:read", "filesystem:write"],
+    "compatibility": {
+      "node": ">=18.0.0",
+      "tryforge": ">=1.0.0"
+    }
+  },
+  "peerDependencies": {
+    "tryforge": ">=1.0.0"
+  }
+}

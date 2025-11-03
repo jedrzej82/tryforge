@@ -1,0 +1,22 @@
+{
+  "name": "tryforge-plugin-hello-world",
+  "version": "1.0.0",
+  "description": "Simple hello world plugin for TryForge",
+  "main": "index.js",
+  "keywords": ["tryforge", "plugin", "example"],
+  "author": "TryForge Team",
+  "license": "MIT",
+  "tryforge": {
+    "type": "cli",
+    "version": "1.0.0",
+    "hooks": ["before:create", "after:create"],
+    "permissions": [],
+    "compatibility": {
+      "node": ">=18.0.0",
+      "tryforge": ">=1.0.0"
+    }
+  },
+  "peerDependencies": {
+    "tryforge": ">=1.0.0"
+  }
+}

@@ -13,6 +13,7 @@ const { handleError } = require('../utils/error-handler');
 const CreateCommand = require('./commands/create');
 const RefactorCommand = require('./commands/refactor');
 const AnalyzeCommand = require('./commands/analyze');
+const SecurityCommand = require('./commands/security');
 const StatusCommand = require('./commands/status');
 const { createPromptOrchestrator, prompts } = require('./prompts');
 
@@ -207,6 +208,107 @@ program
     await AnalyzeCommand.execute(type || 'codebase', options);
   });
 
+// SECURITY Commands - Security Scanning & Vulnerability Detection
+program
+  .command('security [action] [path]')
+  .description('Security scanning (scan|dependencies|secrets|audit|fix|report|score)')
+  .option('-f, --format <format>', 'Report format (text|json|html|markdown)', 'text')
+  .option('-o, --output <file>', 'Output file path')
+  .option('--auto', 'Auto-approve fixes')
+  .option('--dry-run', 'Show what would be fixed without making changes')
+  .option('--standards <list>', 'Compliance standards (OWASP,PCI-DSS,GDPR)')
+  .action(async (action, targetPath, options) => {
+    try {
+      await SecurityCommand.execute(action || 'scan', targetPath || '.', options);
+    } catch (error) {
+      handleError(error, { context: 'Security Command', exitOnError: true });
+    }
+  });
+
+program
+  .command('security:scan [path]')
+  .description('Run comprehensive security scan')
+  .option('-f, --format <format>', 'Report format', 'text')
+  .option('-o, --output <file>', 'Output file')
+  .action(async (targetPath, options) => {
+    try {
+      await SecurityCommand.execute('scan', targetPath || '.', options);
+    } catch (error) {
+      handleError(error, { context: 'Security Scan', exitOnError: true });
+    }
+  });
+
+program
+  .command('security:dependencies [path]')
+  .description('Scan dependencies for vulnerabilities')
+  .action(async (targetPath) => {
+    try {
+      await SecurityCommand.execute('dependencies', targetPath || '.');
+    } catch (error) {
+      handleError(error, { context: 'Security Dependencies', exitOnError: true });
+    }
+  });
+
+program
+  .command('security:secrets [path]')
+  .description('Scan for hardcoded secrets and credentials')
+  .action(async (targetPath) => {
+    try {
+      await SecurityCommand.execute('secrets', targetPath || '.');
+    } catch (error) {
+      handleError(error, { context: 'Security Secrets', exitOnError: true });
+    }
+  });
+
+program
+  .command('security:audit [path]')
+  .description('Run compliance audit')
+  .option('--standards <list>', 'Compliance standards', 'OWASP')
+  .action(async (targetPath, options) => {
+    try {
+      await SecurityCommand.execute('audit', targetPath || '.', options);
+    } catch (error) {
+      handleError(error, { context: 'Security Audit', exitOnError: true });
+    }
+  });
+
+program
+  .command('security:fix [path]')
+  .description('Auto-fix security issues')
+  .option('--auto', 'Auto-approve fixes')
+  .option('--dry-run', 'Show what would be fixed')
+  .action(async (targetPath, options) => {
+    try {
+      await SecurityCommand.execute('fix', targetPath || '.', options);
+    } catch (error) {
+      handleError(error, { context: 'Security Fix', exitOnError: true });
+    }
+  });
+
+program
+  .command('security:report [path]')
+  .description('Generate detailed security report')
+  .option('-f, --format <format>', 'Format (text|json|html|markdown)', 'html')
+  .option('-o, --output <file>', 'Output file')
+  .action(async (targetPath, options) => {
+    try {
+      await SecurityCommand.execute('report', targetPath || '.', options);
+    } catch (error) {
+      handleError(error, { context: 'Security Report', exitOnError: true });
+    }
+  });
+
+program
+  .command('security:score [path]')
+  .description('Calculate security score')
+  .action(async (targetPath) => {
+    try {
+      await SecurityCommand.execute('score', targetPath || '.');
+    } catch (error) {
+      handleError(error, { context: 'Security Score', exitOnError: true });
+    }
+  });
+
 // STATUS Command
 program
   .command('status')
@@ -343,6 +445,120 @@ program
   .action(async (type, description, options) => {
     const GenerateCommand = require('./commands/generate');
     await GenerateCommand.execute(type, description, options);
+  });
+
+// DOCS Commands - API Documentation Generation
+program
+  .command('docs:generate')
+  .description('Generate API documentation from code')
+  .option('-p, --path <path>', 'Project path', process.cwd())
+  .option('-o, --output <dir>', 'Output directory', './docs/api')
+  .option('-f, --framework <type>', 'Framework (auto|express|nestjs|fastapi)', 'auto')
+  .option('--format <type>', 'Format (openapi|swagger|markdown|all)', 'all')
+  .option('--name <name>', 'API name', 'API Documentation')
+  .option('--version <version>', 'API version', '1.0.0')
+  .option('--description <desc>', 'API description')
+  .option('--server-url <url>', 'Server URL', 'http://localhost:3000')
+  .option('--theme <theme>', 'Theme (default|dark|blue|purple|green)', 'default')
+  .option('--include-private', 'Include private routes')
+  .option('--no-validate', 'Skip OpenAPI validation')
+  .option('--no-examples', 'Skip generating examples')
+  .action(async (options) => {
+    try {
+      const DocsCommand = require('./commands/docs');
+      await DocsCommand.generate(options);
+    } catch (error) {
+      handleError(error, { context: 'Docs Generate Command', exitOnError: true });
+    }
+  });
+
+program
+  .command('docs:serve')
+  .description('Serve documentation with live server')
+  .option('-p, --port <port>', 'Port number', '3000')
+  .option('-o, --output <dir>', 'Documentation directory', './docs/api')
+  .option('--path <path>', 'Project path', process.cwd())
+  .action(async (options) => {
+    try {
+      const DocsCommand = require('./commands/docs');
+      await DocsCommand.serve(options);
+    } catch (error) {
+      handleError(error, { context: 'Docs Serve Command', exitOnError: true });
+    }
+  });
+
+program
+  .command('docs:export <format> <output>')
+  .description('Export documentation to format (json|yaml|html|markdown|postman)')
+  .option('--path <path>', 'Project path', process.cwd())
+  .option('-f, --framework <type>', 'Framework', 'auto')
+  .option('--name <name>', 'API name')
+  .option('--version <version>', 'API version')
+  .option('--description <desc>', 'API description')
+  .option('--server-url <url>', 'Server URL')
+  .action(async (format, output, options) => {
+    try {
+      const DocsCommand = require('./commands/docs');
+      await DocsCommand.export(format, output, options);
+    } catch (error) {
+      handleError(error, { context: 'Docs Export Command', exitOnError: true });
+    }
+  });
+
+program
+  .command('docs:validate')
+  .description('Validate OpenAPI specification')
+  .option('--spec <path>', 'OpenAPI spec path', './docs/api/openapi.json')
+  .option('-v, --verbose', 'Verbose output')
+  .action(async (options) => {
+    try {
+      const DocsCommand = require('./commands/docs');
+      await DocsCommand.validate(options);
+    } catch (error) {
+      handleError(error, { context: 'Docs Validate Command', exitOnError: true });
+    }
+  });
+
+program
+  .command('docs:init')
+  .description('Initialize documentation configuration')
+  .option('-f, --framework <type>', 'Framework', 'auto')
+  .action(async (options) => {
+    try {
+      const DocsCommand = require('./commands/docs');
+      await DocsCommand.init(options);
+    } catch (error) {
+      handleError(error, { context: 'Docs Init Command', exitOnError: true });
+    }
+  });
+
+program
+  .command('docs:stats')
+  .description('Show API documentation statistics')
+  .option('--path <path>', 'Project path', process.cwd())
+  .option('-f, --framework <type>', 'Framework', 'auto')
+  .action(async (options) => {
+    try {
+      const DocsCommand = require('./commands/docs');
+      await DocsCommand.stats(options);
+    } catch (error) {
+      handleError(error, { context: 'Docs Stats Command', exitOnError: true });
+    }
+  });
+
+program
+  .command('docs:watch')
+  .description('Watch and auto-regenerate documentation')
+  .option('--path <path>', 'Project path', process.cwd())
+  .option('-o, --output <dir>', 'Output directory', './docs/api')
+  .option('-f, --framework <type>', 'Framework', 'auto')
+  .action(async (options) => {
+    try {
+      const DocsCommand = require('./commands/docs');
+      await DocsCommand.watch(options);
+    } catch (error) {
+      handleError(error, { context: 'Docs Watch Command', exitOnError: true });
+    }
   });
 
 // MODELS Commands - Autonomous Model Generation
@@ -595,6 +811,185 @@ program
     await ConfigCommand.info();
   });
 
+// MONITOR Commands - Performance Monitoring & Profiling
+program
+  .command('monitor [action]')
+  .description('Performance monitoring (start|stop|status|profile|analyze|report|export)')
+  .option('--type <type>', 'Profile type (cpu|memory|database)', 'cpu')
+  .option('--duration <ms>', 'Profile duration in milliseconds', '60000')
+  .option('--period <period>', 'Report period (hourly|daily|weekly|monthly)', 'daily')
+  .option('--format <format>', 'Output format (text|json|markdown|prometheus)', 'text')
+  .option('-o, --output <file>', 'Output file path')
+  .action(async (action, options) => {
+    const MonitorCommand = require('./commands/monitor');
+    await MonitorCommand.execute(action || 'status', options);
+  });
+
+program
+  .command('monitor:start')
+  .description('Start performance monitoring')
+  .action(async () => {
+    const MonitorCommand = require('./commands/monitor');
+    await MonitorCommand.start();
+  });
+
+program
+  .command('monitor:stop')
+  .description('Stop performance monitoring')
+  .action(async () => {
+    const MonitorCommand = require('./commands/monitor');
+    await MonitorCommand.stop();
+  });
+
+program
+  .command('monitor:status')
+  .description('Show monitoring status and metrics')
+  .action(async () => {
+    const MonitorCommand = require('./commands/monitor');
+    await MonitorCommand.status();
+  });
+
+program
+  .command('monitor:profile <type>')
+  .description('Profile system (cpu|memory|database)')
+  .option('--duration <ms>', 'Profile duration in milliseconds', '60000')
+  .option('-o, --output <file>', 'Save profile to file')
+  .action(async (type, options) => {
+    const MonitorCommand = require('./commands/monitor');
+    await MonitorCommand.profile({ ...options, type });
+  });
+
+program
+  .command('monitor:analyze')
+  .description('Analyze performance and detect bottlenecks')
+  .action(async () => {
+    const MonitorCommand = require('./commands/monitor');
+    await MonitorCommand.analyze();
+  });
+
+program
+  .command('monitor:report')
+  .description('Generate performance report')
+  .option('--period <period>', 'Report period (hourly|daily|weekly|monthly)', 'daily')
+  .option('--format <format>', 'Output format (text|json|markdown)', 'text')
+  .option('-o, --output <file>', 'Save report to file')
+  .action(async (options) => {
+    const MonitorCommand = require('./commands/monitor');
+    await MonitorCommand.report(options);
+  });
+
+program
+  .command('monitor:export')
+  .description('Export monitoring data')
+  .option('--format <format>', 'Export format (json|prometheus)', 'json')
+  .option('-o, --output <file>', 'Output file')
+  .action(async (options) => {
+    const MonitorCommand = require('./commands/monitor');
+    await MonitorCommand.export(options);
+  });
+
+// PLUGIN Commands - Plugin Management
+program
+  .command('plugin [action] [name]')
+  .description('Manage plugins (list|install|uninstall|enable|disable|info|create|search)')
+  .option('--symlink', 'Create symlink instead of copying (for development)')
+  .option('--path <path>', 'Plugin path or installation directory')
+  .option('--enabled', 'Show only enabled plugins')
+  .option('--disabled', 'Show only disabled plugins')
+  .option('-f, --force', 'Skip confirmation prompts')
+  .option('-v, --verbose', 'Verbose output')
+  .action(async (action, name, options) => {
+    const PluginCommand = require('./commands/plugin');
+    await PluginCommand.execute(action || 'list', name, options);
+  });
+
+program
+  .command('plugin:list')
+  .description('List all installed plugins')
+  .option('--enabled', 'Show only enabled plugins')
+  .option('--disabled', 'Show only disabled plugins')
+  .action(async (options) => {
+    const PluginCommand = require('./commands/plugin');
+    await PluginCommand.list(options);
+  });
+
+program
+  .command('plugin:install <source>')
+  .description('Install a plugin from source (path, npm, or git)')
+  .option('--symlink', 'Create symlink for development')
+  .option('--no-load', 'Do not load plugin after installation')
+  .option('-v, --verbose', 'Verbose output')
+  .action(async (source, options) => {
+    const PluginCommand = require('./commands/plugin');
+    await PluginCommand.install(source, options);
+  });
+
+program
+  .command('plugin:uninstall <name>')
+  .description('Uninstall a plugin')
+  .option('-f, --force', 'Skip confirmation')
+  .action(async (name, options) => {
+    const PluginCommand = require('./commands/plugin');
+    await PluginCommand.uninstall(name, options);
+  });
+
+program
+  .command('plugin:enable <name>')
+  .description('Enable a plugin')
+  .action(async (name) => {
+    const PluginCommand = require('./commands/plugin');
+    await PluginCommand.enable(name);
+  });
+
+program
+  .command('plugin:disable <name>')
+  .description('Disable a plugin')
+  .action(async (name) => {
+    const PluginCommand = require('./commands/plugin');
+    await PluginCommand.disable(name);
+  });
+
+program
+  .command('plugin:info <name>')
+  .description('Show plugin information')
+  .action(async (name) => {
+    const PluginCommand = require('./commands/plugin');
+    await PluginCommand.info(name);
+  });
+
+program
+  .command('plugin:create [name]')
+  .description('Create a new plugin')
+  .option('--path <path>', 'Plugin directory')
+  .action(async (name, options) => {
+    const PluginCommand = require('./commands/plugin');
+    await PluginCommand.create(name, options);
+  });
+
+program
+  .command('plugin:search <query>')
+  .description('Search for plugins')
+  .action(async (query) => {
+    const PluginCommand = require('./commands/plugin');
+    await PluginCommand.search(query);
+  });
+
+program
+  .command('plugin:update <name>')
+  .description('Update a plugin to latest version')
+  .action(async (name) => {
+    const PluginCommand = require('./commands/plugin');
+    await PluginCommand.update(name);
+  });
+
+program
+  .command('plugin:reload <name>')
+  .description('Reload a plugin')
+  .action(async (name) => {
+    const PluginCommand = require('./commands/plugin');
+    await PluginCommand.reload(name);
+  });
+
 // HELP Commands - Enhanced Help System
 program
   .command('help [command]')
@@ -677,9 +1072,13 @@ if (process.argv.length === 2) {
   console.log(chalk.gray('  $ tryforge create "Blog platform" -i   # Create with prompts'));
   console.log(chalk.gray('  $ tryforge models:generate -d "..."    # Auto-generate models'));
   console.log(chalk.gray('  $ tryforge graphics:generate -t blog   # Auto-generate graphics'));
+  console.log(chalk.gray('  $ tryforge docs:generate               # Generate API docs'));
+  console.log(chalk.gray('  $ tryforge security scan               # Security scan'));
+  console.log(chalk.gray('  $ tryforge security fix --auto         # Auto-fix issues'));
   console.log(chalk.gray('  $ tryforge preview                     # Live preview'));
   console.log(chalk.gray('  $ tryforge deploy -i                   # Deploy with prompts'));
-  console.log(chalk.gray('  $ tryforge completion install          # Install auto-completion\n'));
+  console.log(chalk.gray('  $ tryforge completion install          # Install auto-completion'));
+  console.log(chalk.gray('  $ tryforge plugin list                 # List plugins\n'));
   console.log(chalk.white('📚 Help & Documentation:'));
   console.log(chalk.gray('  $ tryforge help                        # Main help'));
   console.log(chalk.gray('  $ tryforge help <command>              # Command help'));
