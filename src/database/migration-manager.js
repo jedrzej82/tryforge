@@ -6,7 +6,6 @@
 const fs = require('fs-extra');
 const path = require('path');
 const Handlebars = require('handlebars');
-const ora = require('ora');
 const chalk = require('chalk');
 const { DatabaseConfig } = require('./config/database-config');
 const AdapterFactory = require('./adapters/adapter-factory');
@@ -22,6 +21,14 @@ const {
   MigrationValidationError,
   MigrationRollbackError
 } = require('./migration-errors');
+const {
+  operationSpinners,
+  createTaskList,
+  createProgressBar,
+  success,
+  error: showError,
+  warning
+} = require('../cli/ui/progress');
 
 class MigrationManager {
   constructor(config = {}) {
@@ -173,7 +180,7 @@ class MigrationManager {
       step = null
     } = options;
 
-    const spinner = ora('Running migrations').start();
+    const spinner = operationSpinners.database('migrating');
 
     try {
       // Acquire lock
@@ -183,7 +190,7 @@ class MigrationManager {
       const migrationFiles = await this.getPendingMigrationFiles();
 
       if (migrationFiles.length === 0) {
-        spinner.info(chalk.blue('No pending migrations'));
+        spinner.info('No pending migrations');
         return { applied: [], skipped: [] };
       }
 
@@ -206,13 +213,22 @@ class MigrationManager {
       }
 
       if (dryRun) {
-        spinner.info(chalk.blue('Dry run mode - no changes will be made'));
+        spinner.info('Dry run mode - no changes will be made');
         console.log(chalk.cyan('\nMigrations to be applied:'));
         migrationsToRun.forEach((m, i) => {
           console.log(chalk.gray(`  ${i + 1}. ${m}`));
         });
+        spinner.stop();
         return { applied: [], skipped: migrationsToRun };
       }
+
+      spinner.stop();
+
+      // Create progress bar for migrations
+      const progressBar = createProgressBar('Applying migrations', {
+        format: '{title} [{bar}] {percentage}% | {value}/{total} migrations'
+      });
+      progressBar.start(migrationsToRun.length, 0);
 
       // Start new batch
       await this.registry.startBatch();
@@ -221,8 +237,8 @@ class MigrationManager {
       const failed = [];
 
       // Run migrations
-      for (const migrationName of migrationsToRun) {
-        spinner.text = `Applying: ${migrationName}`;
+      for (let i = 0; i < migrationsToRun.length; i++) {
+        const migrationName = migrationsToRun[i];
 
         try {
           const startTime = Date.now();
@@ -244,10 +260,13 @@ class MigrationManager {
 
           applied.push(migrationName);
 
-          spinner.succeed(chalk.green(`Applied: ${migrationName} (${executionTime}ms)`));
-          spinner.start();
+          progressBar.update(i + 1, {
+            currentMigration: migrationName,
+            duration: `${executionTime}ms`
+          });
         } catch (error) {
-          spinner.fail(chalk.red(`Failed: ${migrationName}`));
+          progressBar.stop();
+          showError(`Failed to apply migration: ${migrationName}`, { error });
 
           await this.registry.markAsFailed(migrationName, error.message);
 
@@ -255,7 +274,7 @@ class MigrationManager {
 
           // Auto-rollback if configured
           if (this.config.getMigrationConfig().autoRollback) {
-            spinner.text = 'Auto-rollback enabled, reverting changes...';
+            warning('Auto-rollback enabled, reverting changes...');
             await this.rollbackBatch();
           }
 
@@ -268,12 +287,14 @@ class MigrationManager {
         }
       }
 
+      progressBar.stop();
+
       // Bump version
       if (applied.length > 0) {
         await this.versioning.bumpVersion('patch', `Applied ${applied.length} migrations`);
       }
 
-      spinner.succeed(chalk.green(`Successfully applied ${applied.length} migrations`));
+      success(`Successfully applied ${applied.length} migrations`);
 
       logger.info('Migrations applied', {
         count: applied.length,
@@ -282,7 +303,7 @@ class MigrationManager {
 
       return { applied, failed };
     } catch (error) {
-      spinner.fail(chalk.red('Migration failed'));
+      showError('Migration failed', { error });
 
       errorHandler.handle(error, {
         context: 'Apply Migrations',

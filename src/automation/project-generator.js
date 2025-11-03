@@ -7,6 +7,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const Handlebars = require('handlebars');
 const chalk = require('chalk');
+const { createTaskList, operationSpinners, success, error: showError } = require('../cli/ui/progress');
 
 class ProjectGenerator {
   constructor(projectName, architecture) {
@@ -21,37 +22,76 @@ class ProjectGenerator {
   async generate(results, options = {}) {
     const { graphics, frontend, backend } = results;
 
-    // Create project structure
-    await this.createStructure();
+    // Create task list for project generation
+    const tasks = createTaskList('Generating Project', [
+      'Create project structure',
+      'Generate frontend',
+      'Generate backend',
+      'Copy graphics assets',
+      'Generate AI graphics',
+      'Generate configuration',
+      'Generate documentation'
+    ]);
 
-    // Generate frontend from template
-    await this.generateFrontend(frontend, graphics);
+    tasks.start();
 
-    // Generate backend from template
-    await this.generateBackend(backend);
+    try {
+      // Create project structure
+      tasks.startTask(0);
+      await this.createStructure();
+      tasks.completeTask(0);
 
-    // Copy graphics assets (if provided)
-    if (graphics && graphics.length > 0) {
-      await this.copyGraphics(graphics);
+      // Generate frontend from template
+      tasks.startTask(1);
+      await this.generateFrontend(frontend, graphics);
+      tasks.completeTask(1);
+
+      // Generate backend from template
+      tasks.startTask(2);
+      await this.generateBackend(backend);
+      tasks.completeTask(2);
+
+      // Copy graphics assets (if provided)
+      tasks.startTask(3);
+      if (graphics && graphics.length > 0) {
+        await this.copyGraphics(graphics);
+        tasks.completeTask(3);
+      } else {
+        tasks.skipTask(3);
+      }
+
+      // Generate professional graphics with AI (NEW!)
+      tasks.startTask(4);
+      if (options.autoGraphics !== false) {
+        await this.generateGraphicsWithAI({
+          style: options.graphicsStyle,
+          colorScheme: options.colorScheme,
+          autoEnrich: options.enrichGraphics !== false,
+          generateVariations: options.graphicsVariations !== false
+        });
+        tasks.completeTask(4);
+      } else {
+        tasks.skipTask(4);
+      }
+
+      // Generate configuration files
+      tasks.startTask(5);
+      await this.generateConfig();
+      tasks.completeTask(5);
+
+      // Generate documentation
+      tasks.startTask(6);
+      await this.generateDocs();
+      tasks.completeTask(6);
+
+      tasks.complete();
+      success(`Project generated successfully at ${this.projectPath}`, { duration: tasks.getElapsedTime ? tasks.getElapsedTime() : null });
+
+      return this.projectPath;
+    } catch (err) {
+      showError(`Project generation failed: ${err.message}`, { error: err });
+      throw err;
     }
-
-    // Generate professional graphics with AI (NEW!)
-    if (options.autoGraphics !== false) {
-      await this.generateGraphicsWithAI({
-        style: options.graphicsStyle,
-        colorScheme: options.colorScheme,
-        autoEnrich: options.enrichGraphics !== false,
-        generateVariations: options.graphicsVariations !== false
-      });
-    }
-
-    // Generate configuration files
-    await this.generateConfig();
-
-    // Generate documentation
-    await this.generateDocs();
-
-    return this.projectPath;
   }
 
   /**

@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0",
+  "logLevel": "info",
+  "ai": {
+    "provider": "claude",
+    "model": "claude-3-sonnet-20240229",
+    "maxTokens": 4096,
+    "temperature": 0.7,
+    "timeout": 30000,
+    "retries": 3
+  },
+  "templates": {
+    "autoUpdate": true,
+    "custom": []
+  },
+  "database": {
+    "provider": "postgresql",
+    "host": "localhost",
+    "port": 5432,
+    "name": "tryforge",
+    "username": "postgres",
+    "ssl": false,
+    "poolMin": 2,
+    "poolMax": 10
+  },
+  "project": {
+    "defaultTemplate": "react-typescript",
+    "defaultDatabase": "postgresql",
+    "includeTests": true,
+    "includeDocs": true,
+    "gitInit": true,
+    "installDeps": true
+  },
+  "cli": {
+    "interactive": true,
+    "verbose": false,
+    "color": true,
+    "progress": true
+  },
+  "generate": {
+    "fileCase": "kebab",
+    "importStyle": "named",
+    "quotes": "single",
+    "semicolons": true,
+    "trailingComma": "es5"
+  }
+}
